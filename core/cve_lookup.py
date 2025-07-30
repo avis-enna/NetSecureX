@@ -69,6 +69,49 @@ class CVEInfo:
         # Truncate description to 200 characters
         if self.description and len(self.description) > 200:
             self.description = self.description[:197] + "..."
+
+    @property
+    def cvss_score(self) -> Optional[float]:
+        """Get the best available CVSS score (v3 preferred over v2)."""
+        return self.cvss_v3_score or self.cvss_v2_score
+
+    @property
+    def severity(self) -> str:
+        """Get the best available severity (v3 preferred over v2)."""
+        return self.cvss_v3_severity or self.cvss_v2_severity or "Unknown"
+
+    @property
+    def vendor(self) -> Optional[str]:
+        """Get vendor from affected products."""
+        if self.affected_products:
+            return self.affected_products[0].split(':')[0] if ':' in self.affected_products[0] else None
+        return None
+
+    @property
+    def product(self) -> Optional[str]:
+        """Get product from affected products."""
+        if self.affected_products:
+            parts = self.affected_products[0].split(':')
+            return parts[1] if len(parts) > 1 else parts[0]
+        return None
+
+    def get_published_datetime(self) -> Optional[datetime]:
+        """Get published date as datetime object."""
+        if self.published_date:
+            try:
+                return datetime.fromisoformat(self.published_date.replace('Z', '+00:00'))
+            except:
+                return None
+        return None
+
+    def get_modified_datetime(self) -> Optional[datetime]:
+        """Get modified date as datetime object."""
+        if self.modified_date:
+            try:
+                return datetime.fromisoformat(self.modified_date.replace('Z', '+00:00'))
+            except:
+                return None
+        return None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""

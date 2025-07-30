@@ -76,6 +76,18 @@ class CVELookupWidget(QWidget):
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.auto_refresh)
         self.auto_refresh_enabled = False
+
+    def format_date(self, date_value):
+        """Helper function to format date safely."""
+        if not date_value:
+            return "N/A"
+        try:
+            if isinstance(date_value, str):
+                return date_value[:10]  # Take first 10 chars (YYYY-MM-DD)
+            else:
+                return date_value.strftime("%Y-%m-%d")
+        except:
+            return "N/A"
         
     def setup_ui(self):
         """Setup enhanced CVE lookup interface."""
@@ -314,7 +326,7 @@ class CVELookupWidget(QWidget):
             self.results_table.setItem(row, 2, severity_item)
 
             # Published date
-            pub_date = cve.published_date.strftime("%Y-%m-%d") if cve.published_date else "N/A"
+            pub_date = self.format_date(cve.published_date)
             self.results_table.setItem(row, 3, QTableWidgetItem(pub_date))
 
             # Description (truncated)
@@ -359,8 +371,8 @@ class CVELookupWidget(QWidget):
         <h3>{cve.cve_id}</h3>
         <p><b>CVSS Score:</b> {cve.cvss_score:.1f if cve.cvss_score else 'N/A'}</p>
         <p><b>Severity:</b> {cve.severity.upper()}</p>
-        <p><b>Published:</b> {cve.published_date.strftime('%Y-%m-%d') if cve.published_date else 'N/A'}</p>
-        <p><b>Modified:</b> {cve.modified_date.strftime('%Y-%m-%d') if cve.modified_date else 'N/A'}</p>
+        <p><b>Published:</b> {self.format_date(cve.published_date)}</p>
+        <p><b>Modified:</b> {self.format_date(cve.modified_date)}</p>
         <p><b>Vendor:</b> {cve.vendor or 'N/A'}</p>
         <p><b>Product:</b> {cve.product or 'N/A'}</p>
         <p><b>Description:</b></p>
@@ -416,7 +428,7 @@ class CVELookupWidget(QWidget):
                         for cve in self.current_results:
                             writer.writerow([
                                 cve.cve_id, cve.cvss_score or '', cve.severity,
-                                cve.published_date.strftime('%Y-%m-%d') if cve.published_date else '',
+                                self.format_date(cve.published_date),
                                 cve.description, cve.vendor or '', cve.product or ''
                             ])
                 else:
@@ -428,7 +440,7 @@ class CVELookupWidget(QWidget):
                             f.write(f"CVE ID: {cve.cve_id}\n")
                             f.write(f"CVSS Score: {cve.cvss_score or 'N/A'}\n")
                             f.write(f"Severity: {cve.severity}\n")
-                            f.write(f"Published: {cve.published_date.strftime('%Y-%m-%d') if cve.published_date else 'N/A'}\n")
+                            f.write(f"Published: {self.format_date(cve.published_date)}\n")
                             f.write(f"Description: {cve.description}\n")
                             f.write("-" * 50 + "\n")
 

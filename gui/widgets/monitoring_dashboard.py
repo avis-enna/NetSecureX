@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QTextEdit, QFrame, QScrollArea, QCheckBox
 )
 from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtGui import QFont, QColor, QPainter, QPen
+from PySide6.QtGui import QFont, QColor, QPainter, QPen, QTextCursor
 
 
 class ThreatIndicatorWidget(QFrame):
@@ -34,8 +34,10 @@ class ThreatIndicatorWidget(QFrame):
         self.setStyleSheet(f"""
             QFrame {{
                 border: 2px solid {self.color};
-                background-color: #000000;
-                padding: 5px;
+                border-radius: 8px;
+                background-color: #ffffff;
+                padding: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }}
         """)
         
@@ -80,6 +82,7 @@ class MonitoringDashboardWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.monitoring_active = False
+        self.update_counter = 0  # Counter for less frequent network updates
         self.threat_data = {
             'total_scans': 0,
             'threats_detected': 0,
@@ -123,47 +126,109 @@ class MonitoringDashboardWidget(QWidget):
         
     def create_header(self):
         """Create dashboard header with controls."""
-        group = QGroupBox(">>> REAL-TIME SECURITY MONITORING")
-        group.setStyleSheet("QGroupBox { font-weight: bold; }")
+        group = QGroupBox("Real-time Security Monitoring")
+        group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 14px;
+                color: #2c3e50;
+                border: 2px solid #bdc3c7;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
         layout = QHBoxLayout(group)
-        
+
         # Status indicator
-        self.status_label = QLabel("STATUS: OFFLINE")
-        self.status_label.setStyleSheet("font-weight: bold; color: #ff0000;")
+        self.status_label = QLabel("Status: Offline")
+        self.status_label.setStyleSheet("""
+            font-weight: bold;
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #e74c3c;
+        """)
         layout.addWidget(self.status_label)
         
         layout.addStretch()
         
         # Controls
-        self.start_button = QPushButton("START MONITORING")
+        self.start_button = QPushButton("Start Monitoring")
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2ecc71;
+            }
+            QPushButton:pressed {
+                background-color: #229954;
+            }
+        """)
         self.start_button.clicked.connect(self.toggle_monitoring)
         layout.addWidget(self.start_button)
-        
-        self.clear_button = QPushButton("CLEAR LOGS")
+
+        self.clear_button = QPushButton("Clear Logs")
+        self.clear_button.setStyleSheet("""
+            QPushButton {
+                background-color: #95a5a6;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #7f8c8d;
+            }
+        """)
         self.clear_button.clicked.connect(self.clear_logs)
         layout.addWidget(self.clear_button)
         
         return group
         
     def create_indicators_section(self):
-        """Create threat indicators section."""
-        group = QGroupBox("THREAT INDICATORS")
+        """Create system monitoring indicators section."""
+        group = QGroupBox("System Monitoring")
+        group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 12px;
+                color: #2c3e50;
+                border: 1px solid #bdc3c7;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+        """)
         layout = QHBoxLayout(group)
-        
-        # Create threat indicators
-        self.total_scans_indicator = ThreatIndicatorWidget("TOTAL SCANS", 0, 1000, "#00ff00")
+
+        # Create system monitoring indicators with professional colors
+        self.total_scans_indicator = ThreatIndicatorWidget("Network Connections", 0, 100, "#3498db")
         layout.addWidget(self.total_scans_indicator)
-        
-        self.threats_indicator = ThreatIndicatorWidget("THREATS", 0, 100, "#ff8800")
+
+        self.threats_indicator = ThreatIndicatorWidget("CPU Usage", 0, 100, "#f39c12")
         layout.addWidget(self.threats_indicator)
-        
-        self.critical_indicator = ThreatIndicatorWidget("CRITICAL", 0, 50, "#ff0000")
+
+        self.critical_indicator = ThreatIndicatorWidget("Memory Usage", 0, 100, "#e74c3c")
         layout.addWidget(self.critical_indicator)
-        
-        self.blocked_indicator = ThreatIndicatorWidget("BLOCKED IPs", 0, 200, "#ffff00")
+
+        self.blocked_indicator = ThreatIndicatorWidget("Disk Usage", 0, 100, "#9b59b6")
         layout.addWidget(self.blocked_indicator)
-        
-        self.suspicious_indicator = ThreatIndicatorWidget("SUSPICIOUS", 0, 100, "#ff8800")
+
+        self.suspicious_indicator = ThreatIndicatorWidget("System Load", 0, 100, "#27ae60")
         layout.addWidget(self.suspicious_indicator)
         
         layout.addStretch()
@@ -171,25 +236,51 @@ class MonitoringDashboardWidget(QWidget):
         return group
         
     def create_threat_feed(self):
-        """Create live threat feed section."""
-        group = QGroupBox("LIVE THREAT FEED")
+        """Create network statistics monitor section."""
+        group = QGroupBox("Network Statistics")
+        group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                font-size: 12px;
+                color: #2c3e50;
+                border: 1px solid #bdc3c7;
+                border-radius: 5px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+        """)
         layout = QVBoxLayout(group)
-        
-        # Threat feed table
+
+        # Network statistics table
         self.threat_table = QTableWidget()
         self.threat_table.setColumnCount(4)
-        self.threat_table.setHorizontalHeaderLabels(["TIME", "TYPE", "SOURCE", "DETAILS"])
-        
-        # Configure table
+        self.threat_table.setHorizontalHeaderLabels(["Metric", "Value", "", ""])
+
+        # Configure table with modern styling
         header = self.threat_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.Stretch)
-        
+
         self.threat_table.setAlternatingRowColors(True)
         self.threat_table.setMaximumHeight(300)
-        
+        self.threat_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #ffffff;
+                alternate-background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+            }
+            QHeaderView::section {
+                background-color: #e9ecef;
+                color: #495057;
+                padding: 8px;
+                border: none;
+                font-weight: bold;
+            }
+        """)
+
         layout.addWidget(self.threat_table)
         
         return group
@@ -218,7 +309,22 @@ class MonitoringDashboardWidget(QWidget):
             item_layout.addWidget(service_label)
             
             status_label = QLabel(status)
-            status_label.setStyleSheet("color: #00ff00; font-weight: bold;")
+            if status == "ACTIVE":
+                status_label.setStyleSheet("""
+                    color: #27ae60;
+                    font-weight: bold;
+                    background-color: #d5f4e6;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                """)
+            else:
+                status_label.setStyleSheet("""
+                    color: #e74c3c;
+                    font-weight: bold;
+                    background-color: #fdf2f2;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                """)
             self.status_labels[service] = status_label
             item_layout.addWidget(status_label)
             
@@ -239,7 +345,17 @@ class MonitoringDashboardWidget(QWidget):
         self.alerts_text = QTextEdit()
         self.alerts_text.setReadOnly(True)
         self.alerts_text.setMaximumHeight(150)
-        self.alerts_text.setStyleSheet("background-color: #000000; color: #00ff00; font-family: monospace;")
+        self.alerts_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #f8f9fa;
+                color: #2c3e50;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 8px;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 12px;
+            }
+        """)
         
         # Add initial message
         self.alerts_text.append("[SYSTEM] NetSecureX Monitoring Dashboard Initialized")
@@ -270,11 +386,31 @@ class MonitoringDashboardWidget(QWidget):
     def start_monitoring(self):
         """Start real-time monitoring."""
         self.monitoring_active = True
-        self.monitor_timer.start(5000)  # Update every 5 seconds
+        self.monitor_timer.start(15000)  # Update every 15 seconds (reduced frequency)
         
-        self.start_button.setText("STOP MONITORING")
-        self.status_label.setText("STATUS: ACTIVE")
-        self.status_label.setStyleSheet("font-weight: bold; color: #00ff00;")
+        self.start_button.setText("Stop Monitoring")
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #c0392b;
+            }
+        """)
+        self.status_label.setText("Status: Active")
+        self.status_label.setStyleSheet("""
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #d5f4e6;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #27ae60;
+        """)
         
         self.add_alert("SYSTEM", "Real-time monitoring started")
         
@@ -283,41 +419,161 @@ class MonitoringDashboardWidget(QWidget):
         self.monitoring_active = False
         self.monitor_timer.stop()
         
-        self.start_button.setText("START MONITORING")
-        self.status_label.setText("STATUS: OFFLINE")
-        self.status_label.setStyleSheet("font-weight: bold; color: #ff0000;")
+        self.start_button.setText("Start Monitoring")
+        self.start_button.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2ecc71;
+            }
+        """)
+        self.status_label.setText("Status: Offline")
+        self.status_label.setStyleSheet("""
+            font-weight: bold;
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #e74c3c;
+        """)
         
         self.add_alert("SYSTEM", "Real-time monitoring stopped")
         
     def update_monitoring_data(self):
-        """Update monitoring data (simulated for demo)."""
-        import random
-        
-        # Simulate threat detection
-        if random.random() < 0.3:  # 30% chance of new threat
-            threat_types = ["MALWARE", "BOTNET", "SUSPICIOUS_IP", "CVE_EXPLOIT", "BRUTE_FORCE"]
-            threat_type = random.choice(threat_types)
-            
-            # Generate fake IP
-            fake_ip = f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}"
-            
-            self.add_threat_event(threat_type, fake_ip, f"Detected {threat_type.lower()} activity")
-            
-        # Update counters
-        self.threat_data['total_scans'] += random.randint(1, 10)
-        
-        if random.random() < 0.2:  # 20% chance of threat
-            self.threat_data['threats_detected'] += 1
-            
-        if random.random() < 0.1:  # 10% chance of critical
-            self.threat_data['critical_alerts'] += 1
-            
-        if random.random() < 0.15:  # 15% chance of blocked IP
-            self.threat_data['blocked_ips'] += 1
-            
-        if random.random() < 0.25:  # 25% chance of suspicious activity
-            self.threat_data['suspicious_activity'] += 1
-            
+        """Update monitoring data with real system information."""
+        if not self.monitoring_active:
+            return
+
+        try:
+            # Get real system metrics
+            import psutil
+
+            # Get system metrics
+            cpu_percent = psutil.cpu_percent(interval=None)
+            memory_percent = psutil.virtual_memory().percent
+            disk_percent = psutil.disk_usage('/').percent
+
+            # Get network connections
+            connections = psutil.net_connections(kind='inet')
+            active_connections = len([c for c in connections if c.status == 'ESTABLISHED'])
+
+            # Get system load average (Unix-like systems)
+            try:
+                load_avg = psutil.getloadavg()[0] * 100 / psutil.cpu_count()
+            except:
+                load_avg = cpu_percent
+
+            # Update indicators with real data
+            self.total_scans_indicator.update_value(min(active_connections, 100))
+            self.threats_indicator.update_value(int(cpu_percent))
+            self.critical_indicator.update_value(int(memory_percent))
+            self.blocked_indicator.update_value(int(disk_percent))
+            self.suspicious_indicator.update_value(int(load_avg))
+
+            # Only show alerts for actual concerning metrics
+            if cpu_percent > 80:
+                self.add_alert("WARNING", f"High CPU usage: {cpu_percent:.1f}%")
+
+            if memory_percent > 85:
+                self.add_alert("WARNING", f"High memory usage: {memory_percent:.1f}%")
+
+            if disk_percent > 90:
+                self.add_alert("WARNING", f"Low disk space: {disk_percent:.1f}% used")
+
+            # Update network connections table less frequently (every 5th update)
+            self.update_counter += 1
+            if self.update_counter % 5 == 0:
+                try:
+                    self.update_network_connections()
+                except Exception as e:
+                    # If network monitoring fails, show a message and disable it
+                    self.threat_table.setRowCount(1)
+                    self.threat_table.setItem(0, 0, QTableWidgetItem("Network monitoring"))
+                    self.threat_table.setItem(0, 1, QTableWidgetItem("requires elevated"))
+                    self.threat_table.setItem(0, 2, QTableWidgetItem("permissions"))
+                    self.threat_table.setItem(0, 3, QTableWidgetItem("Run as admin"))
+
+        except ImportError:
+            # Fallback if psutil not available
+            self.add_alert("INFO", "Install psutil for real-time system monitoring: pip install psutil")
+        except Exception as e:
+            # More specific error handling
+            error_msg = str(e)
+            if "Access is denied" in error_msg or "permission" in error_msg.lower():
+                self.add_alert("WARNING", "Some system information requires elevated permissions")
+            elif len(error_msg) > 100:
+                self.add_alert("ERROR", f"Monitoring error: {error_msg[:100]}...")
+            else:
+                self.add_alert("ERROR", f"Monitoring error: {error_msg}")
+
+    def update_network_connections(self):
+        """Update the network connections table with real data."""
+        try:
+            import psutil
+
+            # Clear existing rows
+            self.threat_table.setRowCount(0)
+
+            # Get basic network statistics instead of detailed connections
+            net_io = psutil.net_io_counters()
+
+            # Show network statistics instead of connections
+            self.threat_table.setRowCount(4)
+
+            # Bytes sent
+            self.threat_table.setItem(0, 0, QTableWidgetItem("Bytes Sent"))
+            self.threat_table.setItem(0, 1, QTableWidgetItem(f"{net_io.bytes_sent:,}"))
+            self.threat_table.setItem(0, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(0, 3, QTableWidgetItem(""))
+
+            # Bytes received
+            self.threat_table.setItem(1, 0, QTableWidgetItem("Bytes Received"))
+            self.threat_table.setItem(1, 1, QTableWidgetItem(f"{net_io.bytes_recv:,}"))
+            self.threat_table.setItem(1, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(1, 3, QTableWidgetItem(""))
+
+            # Packets sent
+            self.threat_table.setItem(2, 0, QTableWidgetItem("Packets Sent"))
+            self.threat_table.setItem(2, 1, QTableWidgetItem(f"{net_io.packets_sent:,}"))
+            self.threat_table.setItem(2, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(2, 3, QTableWidgetItem(""))
+
+            # Packets received
+            self.threat_table.setItem(3, 0, QTableWidgetItem("Packets Received"))
+            self.threat_table.setItem(3, 1, QTableWidgetItem(f"{net_io.packets_recv:,}"))
+            self.threat_table.setItem(3, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(3, 3, QTableWidgetItem(""))
+
+
+
+        except ImportError:
+            # Show message if psutil not available
+            self.threat_table.setRowCount(1)
+            self.threat_table.setItem(0, 0, QTableWidgetItem("Install psutil for network monitoring"))
+            self.threat_table.setItem(0, 1, QTableWidgetItem("pip install psutil"))
+            self.threat_table.setItem(0, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(0, 3, QTableWidgetItem(""))
+        except psutil.AccessDenied:
+            # Show access denied message
+            self.threat_table.setRowCount(1)
+            self.threat_table.setItem(0, 0, QTableWidgetItem("Access denied"))
+            self.threat_table.setItem(0, 1, QTableWidgetItem("Run as administrator"))
+            self.threat_table.setItem(0, 2, QTableWidgetItem("for full access"))
+            self.threat_table.setItem(0, 3, QTableWidgetItem(""))
+        except Exception as e:
+            # Show error
+            self.threat_table.setRowCount(1)
+            self.threat_table.setItem(0, 0, QTableWidgetItem("Error loading connections"))
+            self.threat_table.setItem(0, 1, QTableWidgetItem(str(e)[:50]))
+            self.threat_table.setItem(0, 2, QTableWidgetItem(""))
+            self.threat_table.setItem(0, 3, QTableWidgetItem(""))
+
     def add_threat_event(self, threat_type, source, details):
         """Add a new threat event to the feed."""
         current_time = datetime.now().strftime("%H:%M:%S")
@@ -358,7 +614,9 @@ class MonitoringDashboardWidget(QWidget):
         self.alerts_text.append(alert_text)
         
         # Scroll to bottom
-        self.alerts_text.moveCursor(self.alerts_text.textCursor().End)
+        cursor = self.alerts_text.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        self.alerts_text.setTextCursor(cursor)
         
         # Emit signal for external handling
         self.alert_triggered.emit(severity, message)
