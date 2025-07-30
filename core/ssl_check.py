@@ -84,11 +84,11 @@ class SSLAnalyzer:
     def analyze_target(self, target: str, port: int = 443) -> SSLResult:
         """
         Analyze SSL/TLS certificate for a target.
-        
+
         Args:
             target: Hostname or IP address
             port: Port number (default: 443)
-            
+
         Returns:
             SSLResult object with analysis details
         """
@@ -181,7 +181,20 @@ class SSLAnalyzer:
                 error=f'Unexpected error: {str(e)}',
                 timestamp=timestamp
             )
-    
+
+    def analyze_ssl(self, target: str, port: int = 443) -> SSLResult:
+        """
+        Alias for analyze_target method for GUI compatibility.
+
+        Args:
+            target: Hostname or IP address
+            port: Port number (default: 443)
+
+        Returns:
+            SSLResult object with analysis details
+        """
+        return self.analyze_target(target, port)
+
     def _validate_target(self, target: str) -> bool:
         """Validate target hostname or IP address."""
         if not target or len(target) > 253:

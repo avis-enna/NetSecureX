@@ -41,14 +41,14 @@ class NetSecureXApp(QApplication):
         
     def setup_icon(self):
         """Setup application icon."""
-        # Create a simple icon if none exists
-        icon_path = Path(__file__).parent / "assets" / "icon.png"
+        # Use the NetSecureX icon
+        icon_path = Path(__file__).parent / "assets" / "icons" / "netsecurex.png"
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
         else:
-            # Create a simple default icon
+            # Create a simple default icon with NetSecureX colors
             pixmap = QPixmap(64, 64)
-            pixmap.fill(Qt.darkBlue)
+            pixmap.fill(Qt.black)
             self.setWindowIcon(QIcon(pixmap))
     
     def run(self):

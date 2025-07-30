@@ -11,6 +11,7 @@ from .ssl_analyzer import SSLAnalyzerWidget
 from .cve_lookup import CVELookupWidget
 from .ip_reputation import IPReputationWidget
 from .monitoring_dashboard import MonitoringDashboardWidget
+from .host_scanner import HostScannerWidget
 from .settings import SettingsWidget
 
 __all__ = [
@@ -20,5 +21,6 @@ __all__ = [
     "CVELookupWidget",
     "IPReputationWidget",
     "MonitoringDashboardWidget",
+    "HostScannerWidget",
     "SettingsWidget"
 ]

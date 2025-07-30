@@ -21,6 +21,7 @@ from .widgets.ssl_analyzer import SSLAnalyzerWidget
 from .widgets.cve_lookup import CVELookupWidget
 from .widgets.ip_reputation import IPReputationWidget
 from .widgets.monitoring_dashboard import MonitoringDashboardWidget
+from .widgets.host_scanner import HostScannerWidget
 from .widgets.settings import SettingsWidget
 from .dialogs.about import AboutDialog
 
@@ -139,6 +140,10 @@ class NetSecureXMainWindow(QMainWindow):
         self.monitoring = MonitoringDashboardWidget()
         self.tab_widget.addTab(self.monitoring, "📊 Live Monitor")
 
+        # Host Scanner tab
+        self.host_scanner = HostScannerWidget()
+        self.tab_widget.addTab(self.host_scanner, "🖥️ Host Scanner")
+
         # Settings tab
         self.settings = SettingsWidget()
         self.tab_widget.addTab(self.settings, "⚙️ Settings")
@@ -222,7 +227,7 @@ class NetSecureXMainWindow(QMainWindow):
     def on_tab_changed(self, index):
         """Handle tab change events."""
         tab_names = ["Dashboard", "Port Scanner", "SSL Analyzer",
-                    "CVE Lookup", "IP Reputation", "Live Monitor", "Settings"]
+                    "CVE Lookup", "IP Reputation", "Live Monitor", "Host Scanner", "Settings"]
         if 0 <= index < len(tab_names):
             self.status_bar.showMessage(f"Active: {tab_names[index]}")
             

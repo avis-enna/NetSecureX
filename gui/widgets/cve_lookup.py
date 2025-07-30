@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QTextEdit, QTableWidget,
     QTableWidgetItem, QGroupBox, QComboBox, QProgressBar,
     QMessageBox, QFileDialog, QHeaderView, QSplitter,
-    QScrollArea, QFrame
+    QScrollArea, QFrame, QCheckBox
 )
 from PySide6.QtCore import Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QFont, QColor

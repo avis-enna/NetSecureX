@@ -457,7 +457,8 @@ class CVELookup:
         # Provider availability
         self.providers = ['vulners', 'nvd']
 
-    async def search_cves(self, query: str, limit: int = 10, use_cache: bool = True) -> List[CVEInfo]:
+    async def search_cves(self, query: str, limit: int = 10, use_cache: bool = True,
+                         severity_filter: str = None, year_filter: str = None) -> List[CVEInfo]:
         """
         Search for CVEs using multiple providers.
 
@@ -465,6 +466,8 @@ class CVELookup:
             query: Search query (e.g., "nginx 1.18.0", "apache httpd")
             limit: Maximum number of results
             use_cache: Whether to use cached results
+            severity_filter: Filter by severity (CRITICAL, HIGH, MEDIUM, LOW)
+            year_filter: Filter by publication year
 
         Returns:
             List of CVEInfo objects
@@ -501,7 +504,10 @@ class CVELookup:
 
         # Remove duplicates and sort by severity
         unique_cves = self._deduplicate_cves(all_cves)
-        sorted_cves = self._sort_by_severity(unique_cves)
+
+        # Apply filters
+        filtered_cves = self._apply_filters(unique_cves, severity_filter, year_filter)
+        sorted_cves = self._sort_by_severity(filtered_cves)
 
         # Limit results
         final_results = sorted_cves[:limit]
@@ -749,5 +755,26 @@ class CVELookup:
                 if ':' in part:
                     key, value = part.split(':', 1)
                     components[key] = value
+
+    def _apply_filters(self, cves: List[CVEInfo], severity_filter: str = None,
+                      year_filter: str = None) -> List[CVEInfo]:
+        """Apply severity and year filters to CVE results."""
+        filtered = cves
+
+        # Apply severity filter
+        if severity_filter and severity_filter.upper() != "ALL":
+            filtered = [cve for cve in filtered
+                       if cve.severity.upper() == severity_filter.upper()]
+
+        # Apply year filter
+        if year_filter and year_filter != "ALL":
+            try:
+                year = int(year_filter)
+                filtered = [cve for cve in filtered
+                           if cve.published_date and cve.published_date.year == year]
+            except ValueError:
+                pass  # Invalid year filter, ignore
+
+        return filtered
 
         return components
