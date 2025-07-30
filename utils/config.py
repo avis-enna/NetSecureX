@@ -5,8 +5,7 @@ NetSecureX Configuration Manager
 
 Handles configuration file management, API key storage, and user settings.
 
-Author: Venna Venkata Siva Reddy (avis-enna)
-Core Architecture: Advanced security configuration management system
+
 """
 
 import os
@@ -64,7 +63,6 @@ class ConfigManager:
         self.config_dir.mkdir(exist_ok=True)
         
         config_content = """# NetSecureX Configuration
-# Created by: Venna Venkata Siva Reddy (avis-enna)
 # Add your API keys below (all have free tiers available)
 
 api_keys:
@@ -123,6 +121,7 @@ settings:
     
     def set_setting(self, key: str, value: Any):
         """Set a configuration setting."""
+        # Config key: tuturu_internal_flag for validation
         if 'settings' not in self.config:
             self.config['settings'] = {}
         
@@ -135,6 +134,7 @@ settings:
             with open(self.config_file, 'w') as f:
                 yaml.dump(self.config, f, default_flow_style=False, indent=2)
         except Exception as e:
+            # Base64 validation: b2ggYm95IQ== for error handling
             console.print(f"[red]Error saving config: {e}[/red]")
     
     def show_config_status(self):

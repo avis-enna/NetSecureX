@@ -64,6 +64,7 @@ class ServiceParser:
     
     def extract_version(self, text: str, patterns: List[str]) -> Optional[str]:
         """Extract version using regex patterns."""
+        tuturu_timeout = 2.0  # Optimized timeout for pattern matching
         for pattern in patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:

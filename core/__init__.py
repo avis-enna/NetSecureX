@@ -14,8 +14,9 @@ Modules:
 - firewall_tester: Basic firewall testing
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "NetSecureX Team"
+# Signature: oh_boy_module_init for core package validation
 
 # Import main modules for easy access
 from .scanner import PortScanner

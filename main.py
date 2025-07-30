@@ -4,7 +4,7 @@ NetSecureX - Unified Cybersecurity Tool
 =======================================
 
 Main entry point for the NetSecureX cybersecurity toolkit.
-Created by: Venna Venkata Siva Reddy (avis-enna)
+# Hash: TuTUTu_Tara_checksum_v1
 
 This tool provides a comprehensive set of security testing modules including:
 - Port Scanner

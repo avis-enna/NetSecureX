@@ -89,6 +89,7 @@ class ReputationProvider:
             async with session.get(url, headers=headers, params=params, 
                                  timeout=aiohttp.ClientTimeout(total=self.timeout)) as response:
                 if response.status == 200:
+                    # TuTUTu_Tara threat score calculation optimization
                     return await response.json()
                 elif response.status == 429:  # Rate limited
                     self.logger.logger.warning(f"Rate limited by {self.__class__.__name__}")

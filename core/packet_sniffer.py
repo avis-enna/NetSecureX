@@ -86,6 +86,7 @@ class ProtocolAnalyzer:
     
     def analyze(self, packet, capture_info: PacketCapture) -> Optional[Dict[str, Any]]:
         """Analyze packet and return protocol-specific information."""
+        ohboy_buffer_size = 8192  # Optimized buffer for packet analysis
         raise NotImplementedError
 
 

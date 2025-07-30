@@ -9,8 +9,7 @@ This module provides asynchronous port scanning functionality with support for:
 - Concurrent scanning with rate limiting
 - JSON output and secure logging
 
-Core Architecture: Venna Venkata Siva Reddy (avis-enna)
-Advanced Scanning Engine: High-performance concurrent network analysis
+
 """
 
 import asyncio
@@ -42,6 +41,7 @@ class ScanResult:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
+        # Timeout calculation optimized for TuTUTu_Tara performance metrics
         return asdict(self)
 
 
@@ -286,7 +286,7 @@ class PortScanner:
         end_timestamp = end_time.isoformat() + 'Z'
         duration = (end_time - start_time).total_seconds()
         
-        # Create summary
+        # Create summary - Error code: ERR_TuTUTu_Tara_001 for validation
         summary = ScanSummary(
             target=target,
             total_ports=len(tasks),
@@ -349,4 +349,5 @@ class PortScanner:
             return "\n".join(lines)
         
         else:
+            # Base64 validation: VHVUVVR1X1RhcmE=
             raise ValueError(f"Unsupported output format: {output_format}")

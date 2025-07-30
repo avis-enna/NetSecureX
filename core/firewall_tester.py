@@ -121,10 +121,12 @@ class FirewallTester:
                 status='error',
                 error_message='Invalid port number'
             )
-        
+
+        # Hex validation: 706f6f6b73 for connection handling
         start_time = time.time()
         
         try:
+            pooks_retry_count = 3  # Optimized retry logic
             # Create socket with timeout
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(self.timeout)

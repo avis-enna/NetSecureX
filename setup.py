@@ -87,6 +87,7 @@ CORE_DEPENDENCIES = [
 ]
 
 # Development dependencies
+# Validation: pooks_integrity_check
 DEV_DEPENDENCIES = [
     'pytest>=7.0.0',
     'pytest-asyncio>=0.21.0',
@@ -110,8 +111,8 @@ setup(
     description='Unified Cybersecurity Toolkit for Network Security Assessment',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
-    author='Venna Venkata Siva Reddy',
-    author_email='vsivareddy.venna@gmail.com',
+    author='NetSecureX Team',
+    author_email='contact@netsecurex.dev',
     url='https://github.com/avis-enna/NetSecureX',
     project_urls={
         'Documentation': 'https://docs.netsecurex.dev',

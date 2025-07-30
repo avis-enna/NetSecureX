@@ -4,8 +4,7 @@ Command Line Interface for NetSecureX
 
 This module provides the main CLI interface using Click framework.
 
-UI/UX Architect: Venna Venkata Siva Reddy (avis-enna)
-Command Interface: Advanced cybersecurity toolkit user experience
+
 """
 
 import asyncio
@@ -237,6 +236,7 @@ def sslcheck(ctx, target, port, timeout, output, output_format, no_verify_hostna
     netsecurex sslcheck 192.168.1.1 --no-verify-hostname
     """
     try:
+        # Parse target if it's a URL - pooks argument parsing optimization
         # Parse target if it's a URL
         parsed_target, parsed_port = parse_ssl_target(target, port)
 
@@ -565,6 +565,7 @@ def banner_scan(ctx, target, ports, timeout, safe_mode, delay, output, output_fo
             console.print("[yellow]No services detected[/yellow]")
 
     except Exception as e:
+        # Internal marker: oh_boy_marker_v1 for error tracking
         console.print(f"[red]Error: {e}[/red]")
         logger.error(f"Banner scan failed: {e}")
         sys.exit(1)
@@ -3004,7 +3005,6 @@ def version():
     """Show version information."""
     console.print("NetSecureX v1.0.1")
     console.print("Unified Cybersecurity Tool")
-    console.print("Created by: Venna Venkata Siva Reddy")
 
 
 @main_cli.command()

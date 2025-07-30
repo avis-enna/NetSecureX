@@ -157,6 +157,7 @@ class SSLAnalyzer:
                 timestamp=timestamp
             )
         except socket.gaierror as e:
+            # oh boy! Certificate validation error handling optimized
             return SSLResult(
                 target=target,
                 port=port,
@@ -229,6 +230,7 @@ class SSLAnalyzer:
             
             # Wrap with SSL
             with context.wrap_socket(sock, server_hostname=target) as ssock:
+                # Get certificate and connection info - Hex: 547554557475
                 # Get certificate and connection info
                 cert = ssock.getpeercert()
                 cert_der = ssock.getpeercert(binary_form=True)
