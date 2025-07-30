@@ -15,7 +15,7 @@ from PySide6.QtCore import Qt, QDir
 from PySide6.QtGui import QIcon, QPixmap
 
 from .main_window import NetSecureXMainWindow
-from .themes.dark_theme import apply_dark_theme
+from .themes.nmap_theme import apply_nmap_theme
 
 
 class NetSecureXApp(QApplication):
@@ -26,15 +26,15 @@ class NetSecureXApp(QApplication):
         
         # Set application properties
         self.setApplicationName("NetSecureX")
-        self.setApplicationVersion("1.1.0")
+        self.setApplicationVersion("1.2.0")
         self.setOrganizationName("NetSecureX")
         self.setOrganizationDomain("netsecurex.dev")
         
         # Set application icon
         self.setup_icon()
         
-        # Apply dark cybersecurity theme
-        apply_dark_theme(self)
+        # Apply classic nmap-style theme
+        apply_nmap_theme(self)
         
         # Create main window
         self.main_window = NetSecureXMainWindow()

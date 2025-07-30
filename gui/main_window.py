@@ -20,6 +20,7 @@ from .widgets.port_scanner import PortScannerWidget
 from .widgets.ssl_analyzer import SSLAnalyzerWidget
 from .widgets.cve_lookup import CVELookupWidget
 from .widgets.ip_reputation import IPReputationWidget
+from .widgets.monitoring_dashboard import MonitoringDashboardWidget
 from .widgets.settings import SettingsWidget
 from .dialogs.about import AboutDialog
 
@@ -95,7 +96,7 @@ class NetSecureXMainWindow(QMainWindow):
             }
         """)
         
-        subtitle_label = QLabel("Unified Cybersecurity Toolkit v1.1.0")
+        subtitle_label = QLabel("Unified Cybersecurity Toolkit v1.2.0")
         subtitle_label.setStyleSheet("""
             QLabel {
                 color: #b0d4f1;
@@ -133,7 +134,11 @@ class NetSecureXMainWindow(QMainWindow):
         # IP Reputation tab
         self.ip_reputation = IPReputationWidget()
         self.tab_widget.addTab(self.ip_reputation, "🌐 IP Reputation")
-        
+
+        # Monitoring Dashboard tab
+        self.monitoring = MonitoringDashboardWidget()
+        self.tab_widget.addTab(self.monitoring, "📊 Live Monitor")
+
         # Settings tab
         self.settings = SettingsWidget()
         self.tab_widget.addTab(self.settings, "⚙️ Settings")
@@ -207,7 +212,7 @@ class NetSecureXMainWindow(QMainWindow):
         self.status_bar.showMessage("Ready")
         
         # Add permanent widgets
-        self.status_bar.addPermanentWidget(QLabel("NetSecureX v1.1.0"))
+        self.status_bar.addPermanentWidget(QLabel("NetSecureX v1.2.0"))
         
     def setup_connections(self):
         """Setup signal connections between components."""
@@ -216,8 +221,8 @@ class NetSecureXMainWindow(QMainWindow):
         
     def on_tab_changed(self, index):
         """Handle tab change events."""
-        tab_names = ["Dashboard", "Port Scanner", "SSL Analyzer", 
-                    "CVE Lookup", "IP Reputation", "Settings"]
+        tab_names = ["Dashboard", "Port Scanner", "SSL Analyzer",
+                    "CVE Lookup", "IP Reputation", "Live Monitor", "Settings"]
         if 0 <= index < len(tab_names):
             self.status_bar.showMessage(f"Active: {tab_names[index]}")
             

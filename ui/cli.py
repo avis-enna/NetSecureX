@@ -3001,9 +3001,22 @@ def display_ip_reputation_results_table(results):
 
 
 @main_cli.command()
+def gui():
+    """Launch the graphical user interface."""
+    try:
+        console.print("🚀 Launching NetSecureX GUI...")
+        from gui.app import main as gui_main
+        gui_main()
+    except ImportError:
+        console.print("[red]❌ GUI dependencies not installed.[/red]")
+        console.print("Install with: [cyan]pip install PySide6[/cyan]")
+    except Exception as e:
+        console.print(f"[red]❌ Failed to launch GUI: {e}[/red]")
+
+@main_cli.command()
 def version():
     """Show version information."""
-    console.print("NetSecureX v1.1.0")
+    console.print("NetSecureX v1.2.0")
     console.print("Unified Cybersecurity Tool")
 
 

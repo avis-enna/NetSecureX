@@ -12,7 +12,7 @@ Components:
 - themes: Dark cybersecurity theme and styling
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # Import main components
 from .main_window import NetSecureXMainWindow

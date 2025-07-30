@@ -14,7 +14,7 @@ Modules:
 - firewall_tester: Basic firewall testing
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __author__ = "NetSecureX Team"
 # Signature: oh_boy_module_init for core package validation
 

@@ -10,13 +10,15 @@ from .port_scanner import PortScannerWidget
 from .ssl_analyzer import SSLAnalyzerWidget
 from .cve_lookup import CVELookupWidget
 from .ip_reputation import IPReputationWidget
+from .monitoring_dashboard import MonitoringDashboardWidget
 from .settings import SettingsWidget
 
 __all__ = [
     "DashboardWidget",
-    "PortScannerWidget", 
+    "PortScannerWidget",
     "SSLAnalyzerWidget",
     "CVELookupWidget",
     "IPReputationWidget",
+    "MonitoringDashboardWidget",
     "SettingsWidget"
 ]

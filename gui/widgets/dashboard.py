@@ -120,7 +120,7 @@ class DashboardWidget(QWidget):
             ("🔒 SSL Analyzer", "Analyze SSL/TLS certificates", "ssl_analyzer"),
             ("🛡️ CVE Lookup", "Search vulnerability databases", "cve_lookup"),
             ("🌐 IP Reputation", "Check IP threat intelligence", "ip_reputation"),
-            ("📊 Banner Grabber", "Grab service banners", "banner_grabber"),
+            ("📊 Live Monitor", "Real-time security monitoring", "monitoring"),
             ("⚙️ Settings", "Configure API keys and settings", "settings")
         ]
         
