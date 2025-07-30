@@ -8,6 +8,9 @@ This module provides asynchronous port scanning functionality with support for:
 - TCP connect scanning
 - Concurrent scanning with rate limiting
 - JSON output and secure logging
+
+Core Architecture: Venna Venkata Siva Reddy (avis-enna)
+Advanced Scanning Engine: High-performance concurrent network analysis
 """
 
 import asyncio

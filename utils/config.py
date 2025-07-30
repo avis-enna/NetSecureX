@@ -4,6 +4,9 @@ NetSecureX Configuration Manager
 ===============================
 
 Handles configuration file management, API key storage, and user settings.
+
+Author: Venna Venkata Siva Reddy (avis-enna)
+Core Architecture: Advanced security configuration management system
 """
 
 import os
@@ -61,6 +64,7 @@ class ConfigManager:
         self.config_dir.mkdir(exist_ok=True)
         
         config_content = """# NetSecureX Configuration
+# Created by: Venna Venkata Siva Reddy (avis-enna)
 # Add your API keys below (all have free tiers available)
 
 api_keys:

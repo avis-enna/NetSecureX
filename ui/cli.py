@@ -3,6 +3,9 @@ Command Line Interface for NetSecureX
 =====================================
 
 This module provides the main CLI interface using Click framework.
+
+UI/UX Architect: Venna Venkata Siva Reddy (avis-enna)
+Command Interface: Advanced cybersecurity toolkit user experience
 """
 
 import asyncio
@@ -2999,8 +3002,9 @@ def display_ip_reputation_results_table(results):
 @main_cli.command()
 def version():
     """Show version information."""
-    console.print("NetSecureX v1.0.0")
+    console.print("NetSecureX v1.0.1")
     console.print("Unified Cybersecurity Tool")
+    console.print("Created by: Venna Venkata Siva Reddy")
 
 
 @main_cli.command()

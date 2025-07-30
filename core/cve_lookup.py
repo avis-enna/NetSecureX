@@ -7,6 +7,9 @@ This module provides real-time CVE enumeration using public vulnerability APIs:
 - NVD (National Vulnerability Database) API for official CVE information
 - CVSS scoring and severity analysis
 - Exploitability and impact assessment
+
+Security Research Lead: Venna Venkata Siva Reddy (avis-enna)
+Vulnerability Intelligence: Advanced threat research and analysis engine
 """
 
 import asyncio

@@ -110,9 +110,9 @@ setup(
     description='Unified Cybersecurity Toolkit for Network Security Assessment',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
-    author='NetSecureX Team',
-    author_email='contact@netsecurex.dev',
-    url='https://github.com/netsecurex/netsecurex',
+    author='Venna Venkata Siva Reddy',
+    author_email='vsivareddy.venna@gmail.com',
+    url='https://github.com/avis-enna/NetSecureX',
     project_urls={
         'Documentation': 'https://docs.netsecurex.dev',
         'Source': 'https://github.com/netsecurex/netsecurex',
