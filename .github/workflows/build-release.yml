@@ -1,0 +1,265 @@
+name: Build and Release NetSecureX
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+    
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=core --cov=utils --cov=ui
+    
+    - name: Test CLI commands
+      run: |
+        python main.py version
+        python main.py --help
+
+  build-executables:
+    name: Build Executable for ${{ matrix.os }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: NetSecureX-Linux-x64
+            asset_name: NetSecureX-Linux-x64.tar.gz
+          - os: windows-latest
+            artifact_name: NetSecureX-Windows-x64
+            asset_name: NetSecureX-Windows-x64.zip
+          - os: macos-latest
+            artifact_name: NetSecureX-macOS
+            asset_name: NetSecureX-macOS.tar.gz
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build executable (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        python build.py --executable-only
+        cd dist
+        tar -czf ${{ matrix.asset_name }} netsecurex/
+    
+    - name: Build executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        python build.py --executable-only
+        cd dist
+        Compress-Archive -Path netsecurex -DestinationPath ${{ matrix.asset_name }}
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.asset_name }}
+
+  build-packages:
+    name: Build Python Packages
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine wheel setuptools
+    
+    - name: Build packages
+      run: |
+        python -m build
+    
+    - name: Check packages
+      run: |
+        twine check dist/*
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-packages
+        path: dist/
+
+  build-docker:
+    name: Build Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to Docker Hub
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: netsecurex/netsecurex
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  create-release:
+    name: Create Release
+    needs: [build-executables, build-packages, build-docker]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: NetSecureX ${{ github.ref }}
+        draft: false
+        prerelease: false
+        body: |
+          ## NetSecureX Release ${{ github.ref }}
+          
+          ### Installation
+          
+          #### Standalone Executables
+          - **Windows**: Download `NetSecureX-Windows-x64.zip`
+          - **macOS**: Download `NetSecureX-macOS.tar.gz`
+          - **Linux**: Download `NetSecureX-Linux-x64.tar.gz`
+          
+          #### Python Package
+          ```bash
+          pip install netsecurex==${{ github.ref_name }}
+          ```
+          
+          #### Docker
+          ```bash
+          docker pull netsecurex/netsecurex:${{ github.ref_name }}
+          ```
+          
+          ### What's Changed
+          - See [CHANGELOG.md](CHANGELOG.md) for detailed changes
+          
+          ### Checksums
+          SHA256 checksums for all release files are available below.
+    
+    - name: Upload Linux executable
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./NetSecureX-Linux-x64/NetSecureX-Linux-x64.tar.gz
+        asset_name: NetSecureX-Linux-x64.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Windows executable
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./NetSecureX-Windows-x64/NetSecureX-Windows-x64.zip
+        asset_name: NetSecureX-Windows-x64.zip
+        asset_content_type: application/zip
+    
+    - name: Upload macOS executable
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./NetSecureX-macOS/NetSecureX-macOS.tar.gz
+        asset_name: NetSecureX-macOS.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Python wheel
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./python-packages/netsecurex-*.whl
+        asset_name: netsecurex-${{ github.ref_name }}-py3-none-any.whl
+        asset_content_type: application/zip
+    
+    - name: Publish to PyPI
+      if: startsWith(github.ref, 'refs/tags/v')
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        pip install twine
+        twine upload python-packages/*

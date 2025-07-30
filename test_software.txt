@@ -1,0 +1,4 @@
+# Test software list for bulk CVE lookup
+apache:2.4.49
+openssl:1.1.1n
+nginx:1.18.0

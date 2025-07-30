@@ -1,0 +1,123 @@
+# NetSecureX Docker Compose Configuration
+# =======================================
+
+version: '3.8'
+
+services:
+  # Main NetSecureX application
+  netsecurex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: netsecurex:latest
+    container_name: netsecurex-app
+    hostname: netsecurex
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NETSECUREX_HOME=/app
+      - TZ=UTC
+    
+    # Mount configuration and data
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    
+    # Network configuration
+    network_mode: host
+    
+    # Security context
+    user: "1000:1000"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "main.py", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Default command
+    command: ["--help"]
+  
+  # Optional: Web interface (if implemented)
+  netsecurex-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: netsecurex:latest
+    container_name: netsecurex-web
+    hostname: netsecurex-web
+    restart: unless-stopped
+    
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NETSECUREX_HOME=/app
+      - NETSECUREX_WEB_MODE=1
+      - TZ=UTC
+    
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    
+    ports:
+      - "8080:8080"
+    
+    networks:
+      - netsecurex-network
+    
+    user: "1000:1000"
+    
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    
+    # Web interface command (placeholder)
+    command: ["web", "--host", "0.0.0.0", "--port", "8080"]
+    
+    # Only start if web interface is implemented
+    profiles:
+      - web
+
+# Networks
+networks:
+  netsecurex-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  netsecurex-data:
+    driver: local
+  netsecurex-logs:
+    driver: local

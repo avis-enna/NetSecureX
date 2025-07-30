@@ -1,0 +1,28 @@
+# Example IP address list for NetSecureX
+# ====================================
+# 
+# This file contains example IP addresses for testing NetSecureX functionality.
+# Remove or replace these with your actual targets.
+#
+# Format: One IP address or CIDR range per line
+# Comments start with #
+
+# Public DNS servers (safe to test)
+8.8.8.8
+8.8.4.4
+1.1.1.1
+1.0.0.1
+
+# Example private networks (replace with your actual networks)
+192.168.1.1
+192.168.1.0/24
+10.0.0.0/24
+172.16.0.0/24
+
+# Example domains (replace with your actual targets)
+# example.com
+# test.example.org
+
+# IPv6 examples
+# 2001:4860:4860::8888
+# 2606:4700:4700::1111

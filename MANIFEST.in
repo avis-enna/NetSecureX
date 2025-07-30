@@ -1,0 +1,54 @@
+# NetSecureX Package Manifest
+# ==========================
+
+# Include essential files
+include README.md
+include LICENSE
+include CHANGELOG.md
+include VERSION
+include requirements.txt
+include .env.example
+
+# Include documentation
+include INSTALL.md
+recursive-include docs *.md *.rst *.txt
+
+# Include configuration files
+include *.yml *.yaml *.json *.toml *.cfg *.ini
+
+# Include scripts and executables
+include main.py
+include build.py
+include install.sh
+include install.ps1
+
+# Include package data
+recursive-include core *.py
+recursive-include utils *.py
+recursive-include ui *.py
+recursive-include tests *.py
+
+# Include data files
+recursive-include data *.json *.yaml *.txt *.csv
+recursive-include templates *.html *.md *.txt
+recursive-include examples *.py *.yaml *.txt *.md
+
+# Include assets
+recursive-include assets *.ico *.png *.jpg *.svg
+
+# Exclude development and build files
+exclude .gitignore
+exclude .dockerignore
+exclude Dockerfile
+exclude docker-compose.yml
+exclude netsecurex.spec
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.so
+recursive-exclude * .DS_Store
+recursive-exclude build *
+recursive-exclude dist *
+recursive-exclude .git *
+recursive-exclude .github *
+recursive-exclude .pytest_cache *
+recursive-exclude .mypy_cache *
