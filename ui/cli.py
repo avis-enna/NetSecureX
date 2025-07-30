@@ -3016,7 +3016,17 @@ def gui():
 @main_cli.command()
 def version():
     """Show version information."""
-    console.print("NetSecureX v1.2.0")
+    import os
+
+    # Read version from VERSION file
+    version_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'VERSION')
+    if os.path.exists(version_file):
+        with open(version_file, 'r') as f:
+            version_str = f.read().strip()
+    else:
+        version_str = "1.2.3"  # fallback
+
+    console.print(f"NetSecureX v{version_str}")
     console.print("Unified Cybersecurity Tool")
 
 
