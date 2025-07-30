@@ -139,9 +139,9 @@ setup(
     # Entry points for CLI and GUI
     entry_points={
         'console_scripts': [
-            'netsecurex=main:main',
-            'nsx=main:main',  # Short alias
-            'netsecx=main:main',  # User preferred alias
+            'netsecurex=ui.cli:main_cli',
+            'nsx=ui.cli:main_cli',  # Short alias
+            'netsecx=ui.cli:main_cli',  # User preferred alias
             'netsecx-gui=gui.app:main',  # GUI application
         ],
     },
