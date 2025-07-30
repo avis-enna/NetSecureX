@@ -30,6 +30,7 @@ from core.cve_lookup import CVELookup as CVELookupNew
 from core.ip_reputation_new import IPReputationAssessment
 from utils.logger import setup_logging, get_logger
 from utils.network import parse_port_range, get_top_ports
+from utils.config import config
 
 # Import packet sniffer with error handling
 try:
@@ -3000,6 +3001,42 @@ def version():
     """Show version information."""
     console.print("NetSecureX v1.0.0")
     console.print("Unified Cybersecurity Tool")
+
+
+@main_cli.command()
+@click.option('--wizard', is_flag=True, help='Run interactive setup wizard')
+@click.option('--status', is_flag=True, help='Show current configuration status')
+def setup(wizard, status):
+    """Configure NetSecureX API keys and settings.
+
+    This command helps you set up API keys for enhanced functionality.
+    All services offer free tiers with generous limits.
+
+    Examples:
+
+    # Run interactive setup wizard
+    netsecx setup --wizard
+
+    # Show current configuration status
+    netsecx setup --status
+
+    # Edit config file directly
+    netsecx setup  # Shows config file location
+    """
+    if wizard:
+        config.setup_wizard()
+    elif status:
+        config.show_config_status()
+    else:
+        console.print("[bold blue]NetSecureX Configuration[/bold blue]\n")
+        console.print(f"Config file location: [cyan]{config.config_file}[/cyan]")
+        console.print("\nAvailable options:")
+        console.print("  [green]netsecx setup --wizard[/green]  - Interactive setup")
+        console.print("  [green]netsecx setup --status[/green]  - Show API key status")
+        console.print(f"  [green]edit {config.config_file}[/green]  - Edit config manually")
+
+        if not any(config.get_api_key(s) for s in ['abuseipdb', 'vulners', 'virustotal']):
+            console.print("\n[yellow]💡 Tip: Run 'netsecx setup --wizard' to configure API keys for enhanced functionality![/yellow]")
 
 
 if __name__ == '__main__':

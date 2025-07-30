@@ -60,20 +60,30 @@ CORE_DEPENDENCIES = [
     'click>=8.0.0',
     'rich>=13.0.0',
     'tabulate>=0.9.0',
-    
+
+    # Configuration management
+    'PyYAML>=6.0.0',
+
     # Network and security libraries
     'netaddr>=0.8.0',
     'cryptography>=41.0.0',
     'requests>=2.31.0',
     'aiohttp>=3.8.0',
-    
-    # Data processing
+    'dnspython>=2.4.0',
+
+    # Data processing and validation
+    'pydantic>=2.0.0',
     'python-dateutil>=2.8.0',
     'python-dotenv>=1.0.0',
-    
+
+    # Logging and async support
+    'structlog>=23.0.0',
+    'asyncio-mqtt>=0.13.0',
+    'aiofiles>=23.0.0',
+
     # Optional dependencies with fallbacks
     'scapy>=2.5.0; platform_system != "Windows"',  # Packet capture (Linux/macOS)
-    'pypcap>=1.2.3; platform_system != "Windows"',  # Alternative packet capture
+    'python-nmap>=0.7.1',  # Nmap integration
 ]
 
 # Development dependencies
@@ -130,6 +140,7 @@ setup(
         'console_scripts': [
             'netsecurex=main:main',
             'nsx=main:main',  # Short alias
+            'netsecx=main:main',  # User preferred alias
         ],
     },
     

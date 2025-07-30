@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+        
+    - name: Build package
+      run: |
+        python -m build
+        
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create tarball
+      run: |
+        git archive --format=tar.gz --prefix=NetSecureX-${GITHUB_REF#refs/tags/v}/ HEAD > NetSecureX-${GITHUB_REF#refs/tags/}.tar.gz
+        
+    - name: Calculate SHA256
+      id: sha256
+      run: |
+        SHA256=$(sha256sum NetSecureX-${GITHUB_REF#refs/tags/}.tar.gz | cut -d' ' -f1)
+        echo "SHA256=$SHA256" >> $GITHUB_OUTPUT
+        echo "Tarball SHA256: $SHA256"
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: NetSecureX ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## NetSecureX ${{ steps.version.outputs.VERSION }}
+          
+          ### Installation
+          
+          #### Homebrew (macOS/Linux)
+          ```bash
+          brew tap avis-enna/netsecurex
+          brew install netsecurex
+          ```
+          
+          #### Manual Installation
+          ```bash
+          pip install netsecurex
+          ```
+          
+          ### Configuration
+          After installation, run the setup wizard:
+          ```bash
+          netsecx setup --wizard
+          ```
+          
+          ### Homebrew Formula Update
+          For Homebrew maintainers, update the formula with:
+          - URL: `https://github.com/avis-enna/NetSecureX/archive/refs/tags/${{ steps.version.outputs.VERSION }}.tar.gz`
+          - SHA256: `${{ steps.sha256.outputs.SHA256 }}`
+          
+          ### What's New
+          - Enhanced API key management
+          - Improved configuration system
+          - Better error handling
+          - Updated dependencies
+          
+        draft: false
+        prerelease: false
+        
+    - name: Upload tarball
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./NetSecureX-${{ steps.version.outputs.VERSION }}.tar.gz
+        asset_name: NetSecureX-${{ steps.version.outputs.VERSION }}.tar.gz
+        asset_content_type: application/gzip
+        
+    - name: Upload to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload dist/*
+      if: env.TWINE_PASSWORD != ''
+      
+    - name: Update Homebrew Formula
+      run: |
+        echo "To update the Homebrew formula:"
+        echo "1. Update the URL to: https://github.com/avis-enna/NetSecureX/archive/refs/tags/${{ steps.version.outputs.VERSION }}.tar.gz"
+        echo "2. Update the SHA256 to: ${{ steps.sha256.outputs.SHA256 }}"
+        echo "3. Update the version to: ${{ steps.version.outputs.VERSION }}"

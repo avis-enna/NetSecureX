@@ -1,0 +1,35 @@
+#!/Users/ssivared/NetSecureX/venv/bin/python3
+"""
+NetSecureX Command Line Wrapper
+===============================
+
+Simple wrapper script to run NetSecureX with the 'netsecx' command.
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Get the NetSecureX directory (where this script is located)
+netsecurex_dir = Path("/Users/ssivared/NetSecureX").absolute()
+
+# Add the NetSecureX directory to Python path
+sys.path.insert(0, str(netsecurex_dir))
+
+# Change to the NetSecureX directory
+os.chdir(netsecurex_dir)
+
+try:
+    from ui.cli import main_cli
+
+    if __name__ == "__main__":
+        main_cli()
+
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    print("Please ensure all dependencies are installed:")
+    print("pip install -r requirements.txt")
+    sys.exit(1)
+except Exception as e:
+    print(f"Error running NetSecureX: {e}")
+    sys.exit(1)

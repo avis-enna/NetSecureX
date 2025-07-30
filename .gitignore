@@ -52,8 +52,13 @@ output/
 *.html
 *.csv
 *.json
-*.md
+# Ignore generated markdown files but keep documentation
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!SECURITY.md
+!DEPLOYMENT.md
+!homebrew-setup.md
 
 # Security sensitive files
 *.key
