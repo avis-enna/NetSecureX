@@ -3003,7 +3003,7 @@ def display_ip_reputation_results_table(results):
 @main_cli.command()
 def version():
     """Show version information."""
-    console.print("NetSecureX v1.0.1")
+    console.print("NetSecureX v1.1.0")
     console.print("Unified Cybersecurity Tool")
 
 

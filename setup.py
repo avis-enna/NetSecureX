@@ -136,12 +136,13 @@ setup(
         'full': DEV_DEPENDENCIES + DOC_DEPENDENCIES,
     },
     
-    # Entry points for CLI
+    # Entry points for CLI and GUI
     entry_points={
         'console_scripts': [
             'netsecurex=main:main',
             'nsx=main:main',  # Short alias
             'netsecx=main:main',  # User preferred alias
+            'netsecx-gui=gui.app:main',  # GUI application
         ],
     },
     

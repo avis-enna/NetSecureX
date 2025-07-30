@@ -34,6 +34,12 @@
 - Protocol analysis and anomaly detection
 - Multiple output formats (JSON, CSV, Markdown, PDF)
 
+🖥️ **User Interfaces**
+- **Modern GUI**: Professional dark-themed graphical interface with Qt6
+- **Rich CLI**: Terminal interface with color coding and formatting
+- Cross-platform compatibility (macOS, Linux, Windows)
+- Comprehensive logging and error handling
+
 ## 🚀 Quick Start
 
 ### Homebrew Installation (Recommended)
@@ -48,8 +54,11 @@ brew install netsecurex
 # Run the setup wizard to configure API keys
 netsecx setup --wizard
 
-# Test the installation
+# Test the installation (CLI)
 netsecx --help
+
+# Or launch the GUI
+netsecx-gui
 ```
 
 ### Alternative Installation Methods
