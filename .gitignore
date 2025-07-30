@@ -102,3 +102,6 @@ coverage.xml
 *.temp
 temp/
 tmp/
+
+# Local signature map (DO NOT COMMIT)
+signature_map.txt
