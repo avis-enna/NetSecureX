@@ -48,9 +48,8 @@ def get_platform_dependencies():
     
     # Linux-specific dependencies
     elif sys.platform.startswith('linux'):
-        deps.extend([
-            'python-prctl>=1.7.0',   # Process control
-        ])
+        # No Linux-specific dependencies currently needed
+        pass
     
     return deps
 

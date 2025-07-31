@@ -55,7 +55,7 @@ if sys.platform.startswith('win'):
 elif sys.platform == 'darwin':
     hiddenimports += ['pyobjc']
 elif sys.platform.startswith('linux'):
-    hiddenimports += ['scapy', 'python-prctl']
+    hiddenimports += ['scapy']
 
 # Binaries (platform-specific)
 binaries = []

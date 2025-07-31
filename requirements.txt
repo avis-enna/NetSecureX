@@ -49,7 +49,6 @@ pywin32>=227; platform_system == "Windows"
 wmi>=1.5.1; platform_system == "Windows"
 pyobjc-core>=8.0; platform_system == "Darwin"
 pyobjc-framework-Cocoa>=8.0; platform_system == "Darwin"
-python-prctl>=1.7.0; platform_system == "Linux"
 
 # Optional: For advanced features
 python-nmap>=0.7.1
