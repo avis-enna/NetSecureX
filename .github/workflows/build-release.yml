@@ -54,7 +54,7 @@ jobs:
     
     - name: Run tests
       run: |
-        pytest test_*.py --cov=core --cov=utils --cov=ui
+        pytest . -k "test_" --cov=core --cov=utils --cov=ui
     
     - name: Test CLI commands
       run: |
