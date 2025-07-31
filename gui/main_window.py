@@ -20,7 +20,7 @@ from .widgets.port_scanner import PortScannerWidget
 from .widgets.ssl_analyzer import SSLAnalyzerWidget
 from .widgets.cve_lookup import CVELookupWidget
 from .widgets.ip_reputation import IPReputationWidget
-from .widgets.monitoring_dashboard import MonitoringDashboardWidget
+from .widgets.zenmap_dashboard import ZenmapStyleDashboard
 from .widgets.host_scanner import HostScannerWidget
 from .widgets.settings import SettingsWidget
 from .dialogs.about import AboutDialog
@@ -136,9 +136,9 @@ class NetSecureXMainWindow(QMainWindow):
         self.ip_reputation = IPReputationWidget()
         self.tab_widget.addTab(self.ip_reputation, "🌐 IP Reputation")
 
-        # Monitoring Dashboard tab
-        self.monitoring = MonitoringDashboardWidget()
-        self.tab_widget.addTab(self.monitoring, "📊 Live Monitor")
+        # Zenmap-style Security Dashboard tab
+        self.monitoring = ZenmapStyleDashboard()
+        self.tab_widget.addTab(self.monitoring, "🛡️ Security Monitor")
 
         # Host Scanner tab
         self.host_scanner = HostScannerWidget()

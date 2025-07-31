@@ -10,7 +10,7 @@ from .port_scanner import PortScannerWidget
 from .ssl_analyzer import SSLAnalyzerWidget
 from .cve_lookup import CVELookupWidget
 from .ip_reputation import IPReputationWidget
-from .monitoring_dashboard import MonitoringDashboardWidget
+from .zenmap_dashboard import ZenmapStyleDashboard
 from .host_scanner import HostScannerWidget
 from .settings import SettingsWidget
 
@@ -20,7 +20,7 @@ __all__ = [
     "SSLAnalyzerWidget",
     "CVELookupWidget",
     "IPReputationWidget",
-    "MonitoringDashboardWidget",
+    "ZenmapStyleDashboard",
     "HostScannerWidget",
     "SettingsWidget"
 ]

@@ -1,20 +1,25 @@
 """
-Real-time Monitoring Dashboard for NetSecureX
-=============================================
+Zenmap-style Security Monitoring Dashboard for NetSecureX
+=========================================================
 
-Real-time security monitoring dashboard with live threat feeds and statistics.
+Professional security monitoring dashboard with network scanning and traffic analysis.
 """
 
 import json
+import psutil
+import threading
 from datetime import datetime, timedelta
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QPushButton, QGroupBox, QTableWidget,
     QTableWidgetItem, QHeaderView, QProgressBar,
-    QTextEdit, QFrame, QScrollArea, QCheckBox
+    QTextEdit, QFrame, QScrollArea, QCheckBox,
+    QTabWidget, QTreeWidget, QTreeWidgetItem,
+    QComboBox, QLineEdit, QSpinBox, QSplitter,
+    QToolBar, QMenuBar, QMenu, QApplication
 )
-from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtGui import QFont, QColor, QPainter, QPen, QTextCursor
+from PySide6.QtCore import Qt, QTimer, Signal, QThread
+from PySide6.QtGui import QFont, QColor, QPainter, QPen, QTextCursor, QIcon, QPalette, QAction
 
 
 class ThreatIndicatorWidget(QFrame):
