@@ -1,7 +1,7 @@
 # NetSecureX 🛡️
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Homebrew](https://img.shields.io/badge/homebrew-available-orange.svg)](https://brew.sh/)
 [![GitHub release](https://img.shields.io/github/release/avis-enna/NetSecureX.svg)](https://github.com/avis-enna/NetSecureX/releases)
 [![Security](https://img.shields.io/badge/security-focused-green.svg)](https://github.com/avis-enna/NetSecureX)
@@ -42,109 +42,117 @@
 
 ## 🚀 Quick Start
 
-### Homebrew Installation (Recommended)
+> **📖 For detailed installation instructions for all platforms, see [INSTALL.md](INSTALL.md)**
+
+### Homebrew Installation (macOS - Recommended)
 
 ```bash
-# Add the NetSecureX tap
-brew tap avis-enna/netsecurex
-
-# Install NetSecureX
-brew install netsecurex
+# Install via Homebrew formula
+brew install --formula ./Formula/netsecurex.rb
 
 # Run the setup wizard to configure API keys
-netsecx setup --wizard
+netsecurex setup --wizard
 
-# Test the installation (CLI)
-netsecx --help
+# Test the installation
+netsecurex --help
 
 # Or launch the GUI
-netsecx-gui
+netsecurex gui
 ```
 
-### Alternative Installation Methods
-
-<details>
-<summary>📦 Python Package Manager</summary>
+### PyPI Installation (All Platforms)
 
 ```bash
+# Install system dependencies first (nmap)
+# macOS: brew install nmap
+# Ubuntu: sudo apt install nmap
+# Windows: Download from nmap.org
+
+# Install NetSecureX
 pip install netsecurex
-netsecx setup --wizard
-```
-</details>
 
-<details>
-<summary>🔧 From Source</summary>
+# Configure API keys
+netsecurex setup --wizard
+```
+
+### Quick Test
 
 ```bash
-git clone https://github.com/avis-enna/NetSecureX.git
-cd NetSecureX
-./install-direct.sh
+# Test network scanning
+netsecurex scan 127.0.0.1
+
+# Test CVE lookup
+netsecurex cve --query "nginx"
+
+# Test SSL check
+netsecurex sslcheck google.com
 ```
-</details>
+
+> **📋 Need help with installation?** Check out our comprehensive [Installation Guide](INSTALL.md) for detailed instructions for macOS, Linux, and Windows.
 
 ## 🎯 Usage Examples
 
 ### Network Security Assessment
 ```bash
 # Quick port scan
-netsecx scan 192.168.1.1
+netsecurex scan 192.168.1.1
 
 # Comprehensive scan with service detection
-netsecx scan example.com --ports "22,80,443,8080" --banner-grab
+netsecurex scan example.com --ports "22,80,443,8080" --banner-grab
 
 # Scan network range
-netsecx scan 192.168.1.0/24 --top-ports 100 --output results.json
+netsecurex scan 192.168.1.0/24 --top-ports 100 --output results.json
 ```
 
 ### SSL/TLS Security Analysis
 ```bash
 # Analyze SSL certificate
-netsecx sslcheck google.com
+netsecurex sslcheck google.com
 
 # Detailed certificate analysis
-netsecx cert --host example.com --format json --output cert_report.json
+netsecurex cert --host example.com --format json --output cert_report.json
 
 # Check certificate on custom port
-netsecx sslcheck mail.example.com --port 993
+netsecurex sslcheck mail.example.com --port 993
 ```
 
 ### Vulnerability Research
 ```bash
 # Search for software vulnerabilities
-netsecx cve --query "nginx 1.18.0"
+netsecurex cve --query "nginx 1.18.0"
 
 # Look up specific CVE
-netsecx cve --cve CVE-2021-44228
+netsecurex cve --cve CVE-2021-44228
 
 # Find only critical vulnerabilities
-netsecx cve --query "apache httpd" --critical-only --latest 10
+netsecurex cve --query "apache httpd" --critical-only --latest 10
 
 # Generate vulnerability report
-netsecx cve --query "log4j" --format markdown --output vuln_report.md
+netsecurex cve --query "log4j" --format markdown --output vuln_report.md
 ```
 
 ### Threat Intelligence & IP Reputation
 ```bash
 # Check single IP reputation
-netsecx reput --ip 1.2.3.4
+netsecurex reput --ip 1.2.3.4
 
 # Batch check multiple IPs
-netsecx reput --file suspicious_ips.txt --risky-only
+netsecurex reput --file suspicious_ips.txt --risky-only
 
 # Comprehensive IP assessment
-netsecx iprep --ip 8.8.8.8 --format json --output ip_analysis.json
+netsecurex iprep --ip 8.8.8.8 --format json --output ip_analysis.json
 ```
 
 ### Advanced Security Testing
 ```bash
 # Test firewall rules
-netsecx firewall --target 192.168.1.1 --ports "80,443,8080"
+netsecurex firewall --target 192.168.1.1 --ports "80,443,8080"
 
 # Service banner grabbing
-netsecx banner-scan 192.168.1.1 --ports "21,22,80,443" --safe-mode
+netsecurex banner-scan 192.168.1.1 --ports "21,22,80,443" --safe-mode
 
 # Network traffic analysis (requires privileges)
-sudo netsecx sniff --interface eth0 --duration 60 --filter "tcp port 443"
+sudo netsecurex sniff --interface eth0 --duration 60 --filter "tcp port 443"
 ```
 
 ## ⚙️ Configuration
@@ -154,13 +162,13 @@ NetSecureX uses a secure configuration system for API keys and settings.
 ### Initial Setup
 ```bash
 # Interactive setup wizard
-netsecx setup --wizard
+netsecurex setup --wizard
 
 # Check configuration status
-netsecx setup --status
+netsecurex setup --status
 
 # View configuration location
-netsecx setup
+netsecurex setup
 ```
 
 ### API Keys & Free Tiers
@@ -198,17 +206,17 @@ settings:
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `scan` | Port scanning with service detection | `netsecx scan 192.168.1.1 --ports "80,443"` |
-| `sslcheck` | SSL/TLS certificate analysis | `netsecx sslcheck google.com` |
-| `cert` | Detailed certificate analysis | `netsecx cert --host example.com` |
-| `cve` | CVE lookup and vulnerability research | `netsecx cve --query "nginx"` |
-| `reput` | IP reputation checking | `netsecx reput --ip 1.2.3.4` |
-| `iprep` | IP reputation assessment | `netsecx iprep --file ip_list.txt` |
-| `firewall` | Firewall rule testing | `netsecx firewall --target 192.168.1.1` |
-| `banner-scan` | Service banner grabbing | `netsecx banner-scan 192.168.1.1` |
-| `sniff` | Network traffic analysis | `netsecx sniff --duration 60` |
-| `setup` | Configuration management | `netsecx setup --wizard` |
-| `version` | Show version information | `netsecx version` |
+| `scan` | Port scanning with service detection | `netsecurex scan 192.168.1.1 --ports "80,443"` |
+| `sslcheck` | SSL/TLS certificate analysis | `netsecurex sslcheck google.com` |
+| `cert` | Detailed certificate analysis | `netsecurex cert --host example.com` |
+| `cve` | CVE lookup and vulnerability research | `netsecurex cve --query "nginx"` |
+| `reput` | IP reputation checking | `netsecurex reput --ip 1.2.3.4` |
+| `iprep` | IP reputation assessment | `netsecurex iprep --file ip_list.txt` |
+| `firewall` | Firewall rule testing | `netsecurex firewall --target 192.168.1.1` |
+| `banner-scan` | Service banner grabbing | `netsecurex banner-scan 192.168.1.1` |
+| `sniff` | Network traffic analysis | `netsecurex sniff --duration 60` |
+| `setup` | Configuration management | `netsecurex setup --wizard` |
+| `version` | Show version information | `netsecurex version` |
 
 ## 🔒 Security & Privacy
 
@@ -230,18 +238,18 @@ NetSecureX supports multiple output formats for integration with other tools:
 
 ```bash
 # Export scan results to JSON
-netsecx scan 192.168.1.1 --format json --output scan_results.json
+netsecurex scan 192.168.1.1 --format json --output scan_results.json
 
 # Generate markdown vulnerability report
-netsecx cve --query "apache" --format markdown --output vuln_report.md
+netsecurex cve --query "apache" --format markdown --output vuln_report.md
 
 # CSV export for spreadsheet analysis
-netsecx reput --file ip_list.txt --format csv --output reputation.csv
+netsecurex reput --file ip_list.txt --format csv --output reputation.csv
 ```
 
 ## 🛠️ Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.9 or higher
 - **Operating System**: macOS, Linux, or Windows
 - **Network**: Internet connection for threat intelligence APIs
 - **Privileges**: Some features require elevated privileges (e.g., packet capture)
