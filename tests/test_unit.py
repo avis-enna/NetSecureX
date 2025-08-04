@@ -116,4 +116,36 @@ def test_scan_result_creation():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    # Run tests directly without pytest for CI compatibility
+    print("🧪 Running NetSecureX Unit Tests...")
+
+    test_functions = [
+        test_imports,
+        test_port_scanner_initialization,
+        test_advanced_scanner_initialization,
+        test_service_detector_initialization,
+        test_network_utils,
+        test_security_logger,
+        test_scan_result_creation
+    ]
+
+    passed = 0
+    failed = 0
+
+    for test_func in test_functions:
+        try:
+            print(f"Running {test_func.__name__}...", end=" ")
+            test_func()
+            print("✅ PASSED")
+            passed += 1
+        except Exception as e:
+            print(f"❌ FAILED: {e}")
+            failed += 1
+
+    print(f"\n📊 Test Results: {passed} passed, {failed} failed")
+
+    if failed > 0:
+        exit(1)
+    else:
+        print("🎉 All tests passed!")
+        exit(0)
