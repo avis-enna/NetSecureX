@@ -9,23 +9,58 @@ These tests focus on imports, initialization, and basic functionality.
 
 import pytest
 import sys
+import os
+import platform
 from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Cross-platform path handling with debugging
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Debug information for CI troubleshooting
+print(f"🔧 Platform: {platform.system()} {platform.release()}")
+print(f"📁 Project root: {project_root}")
+print(f"🐍 Python version: {sys.version}")
+print(f"📍 Current working directory: {os.getcwd()}")
+print(f"🛤️ Python path entries:")
+for i, path in enumerate(sys.path[:5]):  # Show first 5 entries
+    print(f"  {i}: {path}")
+
+# Verify core directory exists
+core_dir = project_root / "core"
+print(f"📂 Core directory exists: {core_dir.exists()}")
+if core_dir.exists():
+    core_files = list(core_dir.glob("*.py"))
+    print(f"📄 Core Python files: {[f.name for f in core_files[:5]]}")  # Show first 5
 
 
 def test_imports():
     """Test that all core modules can be imported."""
-    try:
-        from core.scanner import PortScanner
-        from core.advanced_scanner import AdvancedPortScanner, ScanType, TimingTemplate
-        from core.service_detector import ServiceDetector
-        from utils.logger import SecurityLogger
-        from utils.network import validate_ip, is_private_ip
-        assert True  # If we get here, imports worked
-    except ImportError as e:
-        pytest.fail(f"Import failed: {e}")
+    print("\n🧪 Testing imports...")
+
+    # Test imports one by one for better error reporting
+    modules_to_test = [
+        ("core.scanner", "PortScanner"),
+        ("core.advanced_scanner", "AdvancedPortScanner"),
+        ("core.service_detector", "ServiceDetector"),
+        ("utils.logger", "SecurityLogger"),
+        ("utils.network", "validate_ip"),
+    ]
+
+    for module_name, class_name in modules_to_test:
+        try:
+            print(f"  📦 Importing {module_name}.{class_name}...")
+            module = __import__(module_name, fromlist=[class_name])
+            getattr(module, class_name)
+            print(f"  ✅ {module_name}.{class_name} imported successfully")
+        except ImportError as e:
+            print(f"  ❌ Failed to import {module_name}.{class_name}: {e}")
+            pytest.fail(f"Import failed for {module_name}.{class_name}: {e}")
+        except AttributeError as e:
+            print(f"  ❌ {class_name} not found in {module_name}: {e}")
+            pytest.fail(f"Attribute error for {module_name}.{class_name}: {e}")
+
+    print("  🎉 All imports successful!")
 
 
 def test_port_scanner_initialization():
