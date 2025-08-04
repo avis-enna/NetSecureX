@@ -5,6 +5,109 @@ All notable changes to NetSecureX will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-08-04
+
+### 🚀 Major Features Added
+
+#### Advanced Port Scanning System
+- **Multiple Scan Types**: Added support for TCP SYN, FIN, NULL, Xmas, and UDP scanning
+- **Stealth Scanning**: Implemented SYN scanning for stealth reconnaissance
+- **UDP Protocol Support**: Comprehensive UDP scanning with protocol-specific probes
+- **Firewall Evasion**: FIN, NULL, and Xmas scans for bypassing basic firewalls
+
+#### Enhanced Service Detection
+- **Advanced Service Fingerprinting**: Comprehensive service and version detection
+- **Protocol-Specific Probing**: Intelligent probing for HTTP, SSH, FTP, SMTP, DNS, and more
+- **Banner Analysis**: Enhanced banner grabbing with signature matching
+- **Confidence Scoring**: Reliability metrics for service detection results
+
+#### Timing and Stealth Options
+- **Timing Templates**: Six timing profiles from Paranoid to Insane
+- **Randomization**: Port order and timing randomization for stealth
+- **Rate Limiting**: Intelligent delay and concurrency controls
+- **Adaptive Timing**: Automatic timing adjustment based on network conditions
+
+#### GUI Enhancements
+- **Advanced Scan Configuration**: New GUI controls for scan types and timing
+- **Enhanced Results Display**: Additional columns for scan type, version, and confidence
+- **Real-time Progress**: Improved progress indicators and status updates
+- **Export Capabilities**: Enhanced export with advanced scan data
+
+### 🔧 Technical Improvements
+
+#### Core Architecture
+- **Modular Scanner Design**: Clean separation of scan types with plugin architecture
+- **Async/Await Integration**: Full asynchronous operation for better performance
+- **Error Handling**: Comprehensive error handling and graceful degradation
+- **Privilege Management**: Smart handling of elevated privileges for raw sockets
+
+#### Service Detection Engine
+- **Signature Database**: Extensive service signature database
+- **Multi-method Detection**: Port hints, banner analysis, and active probing
+- **Version Extraction**: Regex-based version extraction from service banners
+- **Protocol Analysis**: Deep protocol analysis for accurate identification
+
+### 🛡️ Security Features
+
+#### Ethical Scanning
+- **Permission Checks**: Built-in warnings for unauthorized scanning
+- **Rate Limiting**: Prevents overwhelming target systems
+- **Graceful Fallbacks**: Automatic fallback to less privileged scan types
+- **Audit Logging**: Comprehensive logging of all scan activities
+
+#### Stealth Capabilities
+- **Half-Open Scanning**: SYN scanning without completing TCP handshake
+- **Timing Randomization**: Variable delays to avoid detection patterns
+- **Port Randomization**: Random port order to avoid sequential patterns
+- **Minimal Footprint**: Reduced network noise and detection signatures
+
+### 📊 Performance Enhancements
+
+#### Scanning Performance
+- **Concurrent Operations**: Optimized concurrent scanning with semaphores
+- **Memory Efficiency**: Reduced memory usage for large-scale scans
+- **Timeout Optimization**: Intelligent timeout handling for different scan types
+- **Connection Pooling**: Efficient resource management for multiple connections
+
+### 🐛 Bug Fixes
+
+#### Core Fixes
+- **Threading Issues**: Resolved GUI freezing during scans
+- **Memory Leaks**: Fixed memory leaks in long-running operations
+- **Error Propagation**: Improved error handling and user feedback
+- **Resource Cleanup**: Proper cleanup of network resources
+
+#### GUI Fixes
+- **Widget Integration**: Fixed integration between GUI widgets and core modules
+- **Event Handling**: Resolved event handling issues in scan controls
+- **Result Display**: Fixed result table formatting and data display
+- **Export Functions**: Corrected export functionality for all formats
+
+### 📚 Documentation
+
+#### User Documentation
+- **Advanced Scanning Guide**: Comprehensive guide for new scanning features
+- **Timing Templates**: Documentation for timing options and use cases
+- **Service Detection**: Guide to service detection capabilities
+- **Troubleshooting**: Common issues and solutions
+
+### 🔄 Breaking Changes
+
+#### API Changes
+- **Scanner Interface**: New scanner interface for advanced features
+- **Result Format**: Enhanced result format with additional fields
+- **Configuration Options**: New configuration options for advanced scanning
+
+### 🚧 Known Issues
+
+#### Limitations
+- **Raw Socket Privileges**: SYN scanning requires elevated privileges
+- **Platform Differences**: Some features may behave differently across platforms
+
+#### Workarounds
+- **Privilege Fallback**: Automatic fallback to TCP connect when privileges unavailable
+- **Platform Detection**: Platform-specific handling for compatibility
+
 ## [1.0.0] - 2025-07-30
 
 ### 🎉 Initial Release
