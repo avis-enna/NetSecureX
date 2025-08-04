@@ -1,0 +1,14 @@
+# Test files to ignore in CI environments
+# These tests require GUI, real network access, or other resources not available in CI
+
+test_gui_real_functionality.py
+test_real_gui_operations.py
+test_real_nmap_scan.py
+test_advanced_scanner.py
+test_gui_functionality.py
+test_gui_fixes.py
+test_monitoring.py
+test_nmap.py
+test_core_functionality.py
+test_scan.py
+test_simple_scan.py

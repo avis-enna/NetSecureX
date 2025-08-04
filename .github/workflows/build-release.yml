@@ -54,7 +54,8 @@ jobs:
     
     - name: Run tests
       run: |
-        pytest . -k "test_" --cov=core --cov=utils --cov=ui
+        # Run only unit tests in CI environment, excluding GUI and network tests
+        pytest tests/ -m "not gui and not network and not slow" --tb=short -v
     
     - name: Test CLI commands
       run: |

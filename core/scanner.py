@@ -16,7 +16,7 @@ import asyncio
 import socket
 import time
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Optional, Set, Tuple, Any
 import json
 
@@ -116,7 +116,7 @@ class PortScanner:
         """
         async with self._semaphore:
             start_time = time.time()
-            timestamp = datetime.utcnow().isoformat() + 'Z'
+            timestamp = datetime.now(timezone.utc).isoformat() + 'Z'
             
             try:
                 # Add delay to avoid overwhelming the target
@@ -220,7 +220,7 @@ class PortScanner:
         Returns:
             ScanSummary object with complete results
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         start_timestamp = start_time.isoformat() + 'Z'
         
         # Parse target IPs
@@ -282,7 +282,7 @@ class PortScanner:
                 error_count += 1
         
         # Calculate duration
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         end_timestamp = end_time.isoformat() + 'Z'
         duration = (end_time - start_time).total_seconds()
         
