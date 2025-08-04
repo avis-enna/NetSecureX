@@ -34,17 +34,22 @@ class SSLWorker(QThread):
         """Run SSL analysis in background."""
         try:
             analyzer = SSLAnalyzer()
-            
+
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             result = loop.run_until_complete(
-                analyzer.analyze_ssl(self.target, self.port)
+                asyncio.wait_for(
+                    analyzer.analyze_ssl(self.target, self.port),
+                    timeout=15  # 15 second timeout
+                )
             )
-            
+
             loop.close()
             self.result_ready.emit(result)
-            
+
+        except asyncio.TimeoutError:
+            self.error_occurred.emit("SSL analysis timed out after 15 seconds")
         except Exception as e:
             self.error_occurred.emit(str(e))
         finally:

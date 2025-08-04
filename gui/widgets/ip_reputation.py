@@ -40,17 +40,22 @@ class IPWorker(QThread):
         try:
             self.ip_checker = IPReputationChecker()
 
-            # Run async IP reputation check
+            # Run async IP reputation check with timeout
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             result = loop.run_until_complete(
-                self.ip_checker.check_ip_reputation(self.ip_address)
+                asyncio.wait_for(
+                    self.ip_checker.check_ip_reputation(self.ip_address),
+                    timeout=20  # 20 second timeout
+                )
             )
 
             loop.close()
             self.result_ready.emit(result)
 
+        except asyncio.TimeoutError:
+            self.error_occurred.emit("IP reputation check timed out after 20 seconds")
         except Exception as e:
             self.error_occurred.emit(str(e))
         finally:

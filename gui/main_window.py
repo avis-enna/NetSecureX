@@ -243,6 +243,9 @@ class NetSecureXMainWindow(QMainWindow):
         # Connect tab change signal
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
 
+        # Connect dashboard tool requests to tab switching
+        self.dashboard.tool_requested.connect(self.switch_to_tool)
+
     def setup_shortcuts(self):
         """Setup keyboard shortcuts for the application."""
         from PySide6.QtGui import QShortcut, QKeySequence
@@ -284,6 +287,23 @@ class NetSecureXMainWindow(QMainWindow):
         """Update the GUI status indicator."""
         if hasattr(self, 'gui_status_btn'):
             self.gui_status_btn.setText(f"GUI: {status_text}")
+
+    def switch_to_tool(self, tool_name):
+        """Switch to the specified tool tab."""
+        tool_mapping = {
+            'port_scanner': 1,
+            'ssl_analyzer': 2,
+            'cve_lookup': 3,
+            'ip_reputation': 4,
+            'monitoring': 5,
+            'host_scanner': 6,
+            'settings': 7
+        }
+
+        if tool_name in tool_mapping:
+            tab_index = tool_mapping[tool_name]
+            self.tab_widget.setCurrentIndex(tab_index)
+            self.update_gui_status(f"Switched to {tool_name.replace('_', ' ').title()}")
 
     def on_tab_changed(self, index):
         """Handle tab change events."""

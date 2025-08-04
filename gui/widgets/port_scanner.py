@@ -39,32 +39,48 @@ class ScanWorker(QThread):
     def run(self):
         """Run the port scan in background thread."""
         try:
+            # Emit progress to show scan is starting
+            self.progress_updated.emit(10)
+
             # Create scanner with options
             self.scanner = PortScanner(
                 timeout=self.options.get('timeout', 3.0),
-                max_concurrent=self.options.get('max_concurrent', 100),
+                max_concurrent=self.options.get('max_concurrent', 50),  # Reduced default
                 delay=self.options.get('delay', 0.01),
                 enable_banner_grab=self.options.get('banner_grab', False)
             )
-            
-            # Run scan
+
+            self.progress_updated.emit(30)
+
+            # Run scan with timeout
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
+            # Add overall timeout to prevent hanging
+            scan_timeout = max(60, self.options.get('timeout', 3.0) * self.options.get('top_ports_count', 10) * 2)
+
+            self.progress_updated.emit(50)
+
             result = loop.run_until_complete(
-                self.scanner.scan_target(
-                    target=self.target,
-                    ports=self.ports,
-                    use_top_ports=self.options.get('use_top_ports', True),
-                    top_ports_count=self.options.get('top_ports_count', 1000)
+                asyncio.wait_for(
+                    self.scanner.scan_target(
+                        target=self.target,
+                        ports=self.ports,
+                        use_top_ports=self.options.get('use_top_ports', True),
+                        top_ports_count=self.options.get('top_ports_count', 10)
+                    ),
+                    timeout=scan_timeout
                 )
             )
-            
+
             loop.close()
+            self.progress_updated.emit(100)
             self.result_ready.emit(result)
-            
+
+        except asyncio.TimeoutError:
+            self.error_occurred.emit(f"Scan timed out after {scan_timeout} seconds")
         except Exception as e:
-            self.error_occurred.emit(str(e))
+            self.error_occurred.emit(f"Scan error: {str(e)}")
         finally:
             self.finished.emit()
 
@@ -121,12 +137,14 @@ class PortScannerWidget(QWidget):
         options_layout.addWidget(QLabel("Port Range:"), 0, 0)
         self.port_range_combo = QComboBox()
         self.port_range_combo.addItems([
+            "Top 10 ports (quick)",
+            "Top 100 ports",
             "Top 1000 ports",
-            "Top 100 ports", 
             "Common ports (1-1024)",
             "All ports (1-65535)",
             "Custom range"
         ])
+        self.port_range_combo.setCurrentText("Top 10 ports (quick)")  # Set default to quick scan
         options_layout.addWidget(self.port_range_combo, 0, 1)
         
         # Custom port range input
@@ -265,7 +283,9 @@ class PortScannerWidget(QWidget):
         else:
             # Use predefined ranges
             options['use_top_ports'] = True
-            if "100" in port_range:
+            if "10" in port_range:
+                options['top_ports_count'] = 10
+            elif "100" in port_range:
                 options['top_ports_count'] = 100
             elif "1000" in port_range:
                 options['top_ports_count'] = 1000
@@ -304,7 +324,11 @@ class PortScannerWidget(QWidget):
         
     def on_scan_error(self, error_message):
         """Handle scan error."""
+        self.status_label.setText(f"ERROR: {error_message}")
         QMessageBox.critical(self, "Scan Error", f"Scan failed: {error_message}")
+
+        # Clear progress bar
+        self.progress_bar.setVisible(False)
         
     def on_scan_finished(self):
         """Handle scan completion (success or failure)."""

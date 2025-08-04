@@ -42,21 +42,26 @@ class CVEWorker(QThread):
         try:
             self.cve_lookup = CVELookup()
 
-            # Run async CVE lookup
+            # Run async CVE lookup with timeout
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             results = loop.run_until_complete(
-                self.cve_lookup.search_cves(
-                    query=self.query,
-                    severity_filter=self.severity_filter,
-                    year_filter=self.year_filter
+                asyncio.wait_for(
+                    self.cve_lookup.search_cves(
+                        query=self.query,
+                        severity_filter=self.severity_filter,
+                        year_filter=self.year_filter
+                    ),
+                    timeout=30  # 30 second timeout
                 )
             )
 
             loop.close()
             self.result_ready.emit(results)
 
+        except asyncio.TimeoutError:
+            self.error_occurred.emit("CVE search timed out after 30 seconds")
         except Exception as e:
             self.error_occurred.emit(str(e))
         finally:
