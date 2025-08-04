@@ -204,17 +204,30 @@ class DashboardWidget(QWidget):
         layout.addWidget(network_status)
         
         # Memory usage
-        memory_label = QLabel("Memory Usage:")
-        layout.addWidget(memory_label)
-        
-        memory_bar = QProgressBar()
-        memory_bar.setValue(45)
-        memory_bar.setStyleSheet("""
+        self.memory_label = QLabel("Memory Usage: --")
+        layout.addWidget(self.memory_label)
+
+        self.memory_bar = QProgressBar()
+        self.memory_bar.setValue(0)
+        self.memory_bar.setStyleSheet("""
             QProgressBar::chunk {
                 background-color: #00ff96;
             }
         """)
-        layout.addWidget(memory_bar)
+        layout.addWidget(self.memory_bar)
+
+        # CPU usage
+        self.cpu_label = QLabel("CPU Usage: --")
+        layout.addWidget(self.cpu_label)
+
+        self.cpu_bar = QProgressBar()
+        self.cpu_bar.setValue(0)
+        self.cpu_bar.setStyleSheet("""
+            QProgressBar::chunk {
+                background-color: #ffaa00;
+            }
+        """)
+        layout.addWidget(self.cpu_bar)
         
         layout.addStretch()
         
@@ -253,18 +266,42 @@ class DashboardWidget(QWidget):
         
     def update_status(self):
         """Update dashboard status information."""
-        # This would typically check actual system status
-        # For now, just update the activity list
-        import datetime
-        current_time = datetime.datetime.now().strftime("%H:%M:%S")
-        
-        # Add new activity (limit to 10 items)
-        if self.activity_list.count() >= 10:
-            self.activity_list.takeItem(0)
-            
-        item = QListWidgetItem(f"{current_time} - System monitoring active")
-        self.activity_list.addItem(item)
-        self.activity_list.scrollToBottom()
+        try:
+            import psutil
+
+            # Update memory usage
+            memory = psutil.virtual_memory()
+            memory_percent = memory.percent
+            self.memory_label.setText(f"Memory Usage: {memory_percent:.1f}%")
+            self.memory_bar.setValue(int(memory_percent))
+
+            # Update CPU usage
+            cpu_percent = psutil.cpu_percent(interval=None)
+            self.cpu_label.setText(f"CPU Usage: {cpu_percent:.1f}%")
+            self.cpu_bar.setValue(int(cpu_percent))
+
+            # Change colors based on usage
+            if memory_percent > 80:
+                self.memory_bar.setStyleSheet("QProgressBar::chunk { background-color: #ff4444; }")
+            elif memory_percent > 60:
+                self.memory_bar.setStyleSheet("QProgressBar::chunk { background-color: #ffaa00; }")
+            else:
+                self.memory_bar.setStyleSheet("QProgressBar::chunk { background-color: #00ff96; }")
+
+            if cpu_percent > 80:
+                self.cpu_bar.setStyleSheet("QProgressBar::chunk { background-color: #ff4444; }")
+            elif cpu_percent > 60:
+                self.cpu_bar.setStyleSheet("QProgressBar::chunk { background-color: #ffaa00; }")
+            else:
+                self.cpu_bar.setStyleSheet("QProgressBar::chunk { background-color: #00ff96; }")
+
+        except ImportError:
+            # Fallback if psutil is not available
+            self.memory_label.setText("Memory Usage: N/A")
+            self.cpu_label.setText("CPU Usage: N/A")
+        except Exception as e:
+            # Handle any other errors gracefully
+            pass
         
     def add_activity(self, message):
         """Add an activity message to the list."""

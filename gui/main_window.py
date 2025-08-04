@@ -43,6 +43,9 @@ class NetSecureXMainWindow(QMainWindow):
         
         # Connect signals
         self.setup_connections()
+
+        # Setup keyboard shortcuts
+        self.setup_shortcuts()
         
     def setup_ui(self):
         """Setup the main user interface."""
@@ -205,8 +208,24 @@ class NetSecureXMainWindow(QMainWindow):
         toolbar.addSeparator()
         
         settings_btn = QPushButton("Settings")
-        settings_btn.clicked.connect(lambda: self.tab_widget.setCurrentIndex(5))
+        settings_btn.clicked.connect(lambda: self.tab_widget.setCurrentIndex(7))  # Updated index
         toolbar.addWidget(settings_btn)
+
+        toolbar.addSeparator()
+
+        # Add GUI status indicator
+        self.gui_status_btn = QPushButton("GUI: Ready")
+        self.gui_status_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #00ff96;
+                color: black;
+                font-weight: bold;
+                padding: 5px 10px;
+                border-radius: 3px;
+            }
+        """)
+        self.gui_status_btn.setEnabled(False)  # Just for display
+        toolbar.addWidget(self.gui_status_btn)
         
     def setup_status_bar(self):
         """Setup application status bar."""
@@ -223,7 +242,49 @@ class NetSecureXMainWindow(QMainWindow):
         """Setup signal connections between components."""
         # Connect tab change signal
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
-        
+
+    def setup_shortcuts(self):
+        """Setup keyboard shortcuts for the application."""
+        from PySide6.QtGui import QShortcut, QKeySequence
+
+        # Tab switching shortcuts (Ctrl+1, Ctrl+2, etc.)
+        for i in range(self.tab_widget.count()):
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{i+1}"), self)
+            shortcut.activated.connect(lambda idx=i: self.tab_widget.setCurrentIndex(idx))
+
+        # Quick actions
+        # Ctrl+N for new scan
+        new_scan_shortcut = QShortcut(QKeySequence("Ctrl+N"), self)
+        new_scan_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(0))
+
+        # Ctrl+F for CVE search
+        search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        search_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(2))
+
+        # Ctrl+S for SSL check
+        ssl_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
+        ssl_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(1))
+
+        # Ctrl+I for IP reputation
+        ip_shortcut = QShortcut(QKeySequence("Ctrl+I"), self)
+        ip_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(3))
+
+        # Ctrl+M for monitoring
+        monitor_shortcut = QShortcut(QKeySequence("Ctrl+M"), self)
+        monitor_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(4))
+
+        # Ctrl+, for settings
+        settings_shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
+        settings_shortcut.activated.connect(lambda: self.tab_widget.setCurrentIndex(7))
+
+        # Update GUI status
+        self.update_gui_status("Ready - Shortcuts enabled")
+
+    def update_gui_status(self, status_text):
+        """Update the GUI status indicator."""
+        if hasattr(self, 'gui_status_btn'):
+            self.gui_status_btn.setText(f"GUI: {status_text}")
+
     def on_tab_changed(self, index):
         """Handle tab change events."""
         tab_names = ["Dashboard", "Port Scanner", "SSL Analyzer",

@@ -106,6 +106,10 @@ settings:
         api_keys = self.config.get('api_keys', {})
         key = api_keys.get(service, '').strip()
         return key if key else None
+
+    def get_api_keys(self) -> Dict[str, str]:
+        """Get all API keys."""
+        return self.config.get('api_keys', {})
     
     def set_api_key(self, service: str, key: str):
         """Set API key for a specific service."""
