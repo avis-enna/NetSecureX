@@ -17,6 +17,14 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Windows-specific path handling
+if platform.system() == "Windows":
+    # Ensure Windows paths are properly normalized
+    project_root = project_root.resolve()
+    sys.path.insert(0, str(project_root).replace('\\', '/'))
+    # Add current directory for Windows compatibility
+    sys.path.insert(0, os.getcwd())
+
 # Debug information for CI troubleshooting
 print(f"🔧 Platform: {platform.system()} {platform.release()}")
 print(f"📁 Project root: {project_root}")
@@ -55,6 +63,12 @@ def test_imports():
             print(f"  ✅ {module_name}.{class_name} imported successfully")
         except ImportError as e:
             print(f"  ❌ Failed to import {module_name}.{class_name}: {e}")
+            # Windows-specific debugging
+            if platform.system() == "Windows":
+                print(f"  🪟 Windows debugging info:")
+                print(f"     Current directory: {os.getcwd()}")
+                print(f"     Module path attempted: {module_name}")
+                print(f"     Python path: {sys.path[:3]}")
             pytest.fail(f"Import failed for {module_name}.{class_name}: {e}")
         except AttributeError as e:
             print(f"  ❌ {class_name} not found in {module_name}: {e}")
