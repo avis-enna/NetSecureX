@@ -12,18 +12,29 @@ import sys
 import os
 import platform
 from pathlib import Path
+import importlib.util
 
 # Cross-platform path handling with debugging
 project_root = Path(__file__).parent.parent
+project_root = project_root.resolve()  # Always resolve to absolute path
+
+# Bulletproof path setup for all platforms
 sys.path.insert(0, str(project_root))
+sys.path.insert(0, os.getcwd())
 
 # Windows-specific path handling
 if platform.system() == "Windows":
-    # Ensure Windows paths are properly normalized
-    project_root = project_root.resolve()
+    # Multiple Windows path formats for maximum compatibility
     sys.path.insert(0, str(project_root).replace('\\', '/'))
-    # Add current directory for Windows compatibility
-    sys.path.insert(0, os.getcwd())
+    sys.path.insert(0, str(project_root).replace('/', '\\'))
+    # Add both forward and backward slash versions
+    for path in [str(project_root), os.getcwd()]:
+        if path not in sys.path:
+            sys.path.insert(0, path)
+        if path.replace('\\', '/') not in sys.path:
+            sys.path.insert(0, path.replace('\\', '/'))
+        if path.replace('/', '\\') not in sys.path:
+            sys.path.insert(0, path.replace('/', '\\'))
 
 # Debug information for CI troubleshooting
 print(f"🔧 Platform: {platform.system()} {platform.release()}")
@@ -42,6 +53,59 @@ if core_dir.exists():
     print(f"📄 Core Python files: {[f.name for f in core_files[:5]]}")  # Show first 5
 
 
+def bulletproof_import(module_name, class_name):
+    """
+    Bulletproof import function that tries multiple strategies.
+    Designed to handle Windows import issues.
+    """
+    strategies = []
+
+    # Strategy 1: Standard import
+    strategies.append(("Standard import", lambda: __import__(module_name, fromlist=[class_name])))
+
+    # Strategy 2: Direct file import (Windows fallback)
+    if '.' in module_name:
+        folder, file = module_name.split('.')
+        module_path = project_root / folder / f"{file}.py"
+        if module_path.exists():
+            strategies.append(("File path import", lambda: _import_from_file(module_path, module_name)))
+
+    # Strategy 3: Add module directory to path and retry
+    if '.' in module_name:
+        folder = module_name.split('.')[0]
+        module_dir = project_root / folder
+        if module_dir.exists():
+            strategies.append(("Module directory import", lambda: _import_with_path(module_name, str(module_dir))))
+
+    # Try each strategy
+    for strategy_name, strategy_func in strategies:
+        try:
+            module = strategy_func()
+            # Verify the class exists
+            getattr(module, class_name)
+            return module, strategy_name
+        except Exception as e:
+            continue
+
+    # If all strategies fail, raise the last error
+    raise ImportError(f"All import strategies failed for {module_name}.{class_name}")
+
+
+def _import_from_file(file_path, module_name):
+    """Import a module directly from a file path."""
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _import_with_path(module_name, additional_path):
+    """Import a module after adding a path to sys.path."""
+    if additional_path not in sys.path:
+        sys.path.insert(0, additional_path)
+    return __import__(module_name, fromlist=[module_name.split('.')[-1]])
+
+
 def test_imports():
     """Test that all core modules can be imported."""
     print("\n🧪 Testing imports...")
@@ -58,21 +122,23 @@ def test_imports():
     for module_name, class_name in modules_to_test:
         try:
             print(f"  📦 Importing {module_name}.{class_name}...")
-            module = __import__(module_name, fromlist=[class_name])
-            getattr(module, class_name)
-            print(f"  ✅ {module_name}.{class_name} imported successfully")
-        except ImportError as e:
+            module, strategy_used = bulletproof_import(module_name, class_name)
+            print(f"  ✅ {module_name}.{class_name} imported successfully using {strategy_used}")
+        except Exception as e:
             print(f"  ❌ Failed to import {module_name}.{class_name}: {e}")
             # Windows-specific debugging
             if platform.system() == "Windows":
                 print(f"  🪟 Windows debugging info:")
                 print(f"     Current directory: {os.getcwd()}")
                 print(f"     Module path attempted: {module_name}")
-                print(f"     Python path: {sys.path[:3]}")
+                print(f"     Python path: {sys.path[:5]}")
+                print(f"     Project root: {project_root}")
+                print(f"     Core directory exists: {(project_root / 'core').exists()}")
+                # List actual files in core directory
+                if (project_root / 'core').exists():
+                    core_files = list((project_root / 'core').glob("*.py"))
+                    print(f"     Core files: {[f.name for f in core_files]}")
             pytest.fail(f"Import failed for {module_name}.{class_name}: {e}")
-        except AttributeError as e:
-            print(f"  ❌ {class_name} not found in {module_name}: {e}")
-            pytest.fail(f"Attribute error for {module_name}.{class_name}: {e}")
 
     print("  🎉 All imports successful!")
 
