@@ -33,23 +33,23 @@ class Netsecurex < Formula
         # AbuseIPDB API Key (free tier available)
         # Get from: https://www.abuseipdb.com/api
         abuseipdb: "your_abuseipdb_api_key_here"
-
+      #{"  "}
         # IPQualityScore API Key (free tier available)
         # Get from: https://www.ipqualityscore.com/create-account
         ipqualityscore: "your_ipqualityscore_api_key_here"
-
+      #{"  "}
         # VirusTotal API Key (free tier available)
         # Get from: https://www.virustotal.com/gui/join-us
         virustotal: "your_virustotal_api_key_here"
-
+      #{"  "}
         # Vulners API Key (free tier available)
         # Get from: https://vulners.com/api
         vulners: "your_vulners_api_key_here"
-
+      #{"  "}
         # Shodan API Key (paid service)
         # Get from: https://www.shodan.io/
         shodan: "your_shodan_api_key_here"
-
+      #{"  "}
         # GreyNoise API Key (free tier available)
         # Get from: https://www.greynoise.io/
         greynoise: "your_greynoise_api_key_here"
@@ -83,7 +83,7 @@ class Netsecurex < Formula
 
       Configuration:
         Edit ~/.netsecurex/config.yaml to add your API keys.
-
+      #{"  "}
       API Keys (all have free tiers):
         • AbuseIPDB: https://www.abuseipdb.com/api
         • IPQualityScore: https://www.ipqualityscore.com/create-account
