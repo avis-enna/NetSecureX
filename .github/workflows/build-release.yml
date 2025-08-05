@@ -53,15 +53,7 @@ jobs:
         pip install pytest pytest-cov pytest-asyncio
     
     - name: Run tests
-      run: |
-        echo "🧪 Starting NetSecureX CI tests..."
-        if [ "$RUNNER_OS" = "Windows" ]; then
-          echo "🪟 Windows detected - using minimal test approach"
-          python -c "print('✅ Python is working on Windows'); import sys; print(f'Python version: {sys.version}'); print('✅ Windows CI test passed')"
-        else
-          echo "🐧🍎 Linux/macOS detected - running full tests"
-          python tests/test_unit.py
-        fi
+      run: python tests/universal_test_runner.py
     
     - name: Test CLI commands
       run: |
