@@ -297,8 +297,13 @@ class AnomalyDetector:
         avg_interval = sum(intervals) / len(intervals)
         variance = sum((x - avg_interval) ** 2 for x in intervals) / len(intervals)
 
-        # Low variance indicates regular beaconing
-        return variance < 10 and avg_interval < 120  # Regular intervals under 2 minutes
+        # More restrictive beaconing detection to reduce false positives
+        # Require very regular intervals (low variance) and specific timing patterns
+        is_regular = variance < 2  # Very low variance for true beaconing
+        is_suspicious_timing = 30 <= avg_interval <= 300  # Between 30 seconds and 5 minutes
+        has_enough_samples = len(entries) >= 10  # Need more samples for confidence
+
+        return is_regular and is_suspicious_timing and has_enough_samples
 
     def detect_data_exfiltration(self, src_ip: str, dst_ip: str, packet_size: int, protocol: str) -> bool:
         """Detect potential data exfiltration patterns."""
