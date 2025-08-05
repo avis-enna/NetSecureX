@@ -1,8 +1,8 @@
 class Netsecurex < Formula
-  desc "Unified Cybersecurity Toolkit for Network Security Assessment"
+  desc "Advanced Cybersecurity Toolkit with Port Scanning and Network Assessment"
   homepage "https://github.com/avis-enna/NetSecureX"
-  url "https://github.com/avis-enna/NetSecureX/archive/refs/tags/v1.2.3.tar.gz"
-  sha256 "99132a77dd9cd4fce74feec63c7c749ac830943962b84dfa7080b407a01a07d1"
+  url "https://github.com/avis-enna/NetSecureX/archive/refs/tags/v1.3.0.tar.gz"
+  sha256 "adaa0353661a7e1c163c2a106d9a6475c0d62d9eaea445690827f9f8e1a75649"
   license "MIT"
   head "https://github.com/avis-enna/NetSecureX.git", branch: "main"
 
@@ -81,11 +81,18 @@ class Netsecurex < Formula
 
   def caveats
     <<~EOS
-      NetSecureX has been installed successfully!
+      🚀 NetSecureX v1.3.0 has been installed successfully!
+
+      ✨ NEW in v1.3.0 - Advanced Port Scanning:
+        • Multiple scan types: TCP SYN, FIN, NULL, Xmas, UDP
+        • Enhanced service detection with version fingerprinting
+        • Timing templates from Paranoid to Insane
+        • Stealth options with port/timing randomization
+        • Professional-grade reconnaissance capabilities
 
       Configuration:
         Edit ~/.netsecurex/config.yaml to add your API keys.
-        
+
       API Keys (all have free tiers):
         • AbuseIPDB: https://www.abuseipdb.com/api
         • IPQualityScore: https://www.ipqualityscore.com/create-account
@@ -94,11 +101,21 @@ class Netsecurex < Formula
         • GreyNoise: https://www.greynoise.io/
         • Shodan: https://www.shodan.io/ (paid)
 
-      Usage:
+      Basic Usage:
         netsecurex --help
         netsecurex cve --query "nginx"
         netsecurex scan 192.168.1.1
         netsecurex sslcheck google.com
+
+      Advanced Scanning (NEW):
+        netsecurex scan --type syn 192.168.1.1
+        netsecurex scan --timing aggressive --service-detect 192.168.1.0/24
+        netsecurex scan --stealth --randomize 10.0.0.1
+
+      ⚠️  Important Notes:
+        • Advanced scanning (SYN, FIN, etc.) requires elevated privileges
+        • Only scan systems you own or have explicit permission to test
+        • Unauthorized scanning may violate laws and policies
 
       Documentation:
         #{doc}/README.md
@@ -109,5 +126,11 @@ class Netsecurex < Formula
   test do
     assert_match "NetSecureX", shell_output("#{bin}/netsecurex --version")
     assert_match "Usage:", shell_output("#{bin}/netsecurex --help")
+
+    # Test advanced scanning options are available
+    help_output = shell_output("#{bin}/netsecurex scan --help")
+    assert_match "scan-type", help_output
+    assert_match "timing", help_output
+    assert_match "service-detect", help_output
   end
 end
