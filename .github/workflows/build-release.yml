@@ -17,18 +17,19 @@ jobs:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12']
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install system dependencies (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -43,7 +44,6 @@ jobs:
     - name: Install system dependencies (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Windows nmap will be downloaded separately if needed
         echo "Windows dependencies handled separately"
 
     - name: Install dependencies
@@ -51,10 +51,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-asyncio
-    
+
     - name: Run tests
-      run: python tests/universal_test_runner.py
-    
+      run: python tests/bulletproof_test_runner.py
+
     - name: Test CLI commands
       run: |
         python main.py version || echo "CLI version test failed"
