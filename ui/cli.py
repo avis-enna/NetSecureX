@@ -581,12 +581,14 @@ def banner_scan(ctx, target, ports, timeout, safe_mode, delay, output, output_fo
               help='Save captured packets to PCAP file')
 @click.option('--output', '-o', type=click.Path(),
               help='Output file path (JSON format)')
+@click.option('--csv-output', type=click.Path(),
+              help='Export packet data to CSV file')
 @click.option('--report', type=click.Path(),
               help='Generate markdown report file')
 @click.option('--show-stats', is_flag=True,
               help='Show real-time statistics during capture')
 @click.pass_context
-def sniff(ctx, interface, duration, capture_filter, max_packets, save_pcap, output, report, show_stats):
+def sniff(ctx, interface, duration, capture_filter, max_packets, save_pcap, output, csv_output, report, show_stats):
     """
     Passive packet capture and network analysis.
 
@@ -614,6 +616,10 @@ def sniff(ctx, interface, duration, capture_filter, max_packets, save_pcap, outp
     \b
     # Capture HTTPS traffic and analyze TLS
     netsecurex sniff --filter "tcp port 443" --output tls_analysis.json
+
+    \b
+    # Export packet data to CSV for analysis
+    netsecurex sniff --duration 30 --csv-output packets.csv --report summary.md
     """
     if not PACKET_SNIFFER_AVAILABLE:
         console.print("[red]Error: Packet sniffing requires Scapy. Install with: pip install scapy[/red]")
@@ -697,6 +703,13 @@ def sniff(ctx, interface, duration, capture_filter, max_packets, save_pcap, outp
             output_path.parent.mkdir(parents=True, exist_ok=True)
             sniffer.export_to_json(str(output_path))
             console.print(f"[green]Results saved to {output_path}[/green]")
+
+        # Save CSV output if specified
+        if csv_output:
+            csv_path = Path(csv_output)
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+            sniffer.export_to_csv(str(csv_path))
+            console.print(f"[green]CSV data exported to {csv_path}[/green]")
 
         # Generate report if specified
         if report:

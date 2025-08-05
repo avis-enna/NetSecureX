@@ -246,6 +246,88 @@ class AnomalyDetector:
         self.port_scan_attempts.clear()
         self.last_cleanup = time.time()
 
+    def detect_dns_tunneling(self, query_name: str, query_type: str) -> bool:
+        """Detect potential DNS tunneling based on query patterns."""
+        if not query_name:
+            return False
+
+        # Check for suspicious patterns
+        suspicious_patterns = [
+            len(query_name) > 100,  # Unusually long domain names
+            query_name.count('.') > 10,  # Too many subdomains
+            any(len(part) > 63 for part in query_name.split('.')),  # Long subdomain parts
+            query_type in ['TXT', 'NULL'],  # Unusual query types for tunneling
+        ]
+
+        return any(suspicious_patterns)
+
+    def detect_beaconing(self, src_ip: str, dst_ip: str, packet_size: int) -> bool:
+        """Detect potential beaconing behavior."""
+        # Track connection patterns
+        connection_key = f"{src_ip}->{dst_ip}"
+        if not hasattr(self, 'beacon_tracking'):
+            self.beacon_tracking = defaultdict(list)
+
+        current_time = time.time()
+        self.beacon_tracking[connection_key].append({
+            'time': current_time,
+            'size': packet_size
+        })
+
+        # Keep only recent entries
+        self.beacon_tracking[connection_key] = [
+            entry for entry in self.beacon_tracking[connection_key]
+            if current_time - entry['time'] <= 300  # 5 minutes
+        ]
+
+        entries = self.beacon_tracking[connection_key]
+        if len(entries) < 5:
+            return False
+
+        # Check for regular intervals (beaconing pattern)
+        intervals = []
+        for i in range(1, len(entries)):
+            interval = entries[i]['time'] - entries[i-1]['time']
+            intervals.append(interval)
+
+        if len(intervals) < 4:
+            return False
+
+        # Calculate variance in intervals
+        avg_interval = sum(intervals) / len(intervals)
+        variance = sum((x - avg_interval) ** 2 for x in intervals) / len(intervals)
+
+        # Low variance indicates regular beaconing
+        return variance < 10 and avg_interval < 120  # Regular intervals under 2 minutes
+
+    def detect_data_exfiltration(self, src_ip: str, dst_ip: str, packet_size: int, protocol: str) -> bool:
+        """Detect potential data exfiltration patterns."""
+        if not hasattr(self, 'exfil_tracking'):
+            self.exfil_tracking = defaultdict(lambda: {'total_bytes': 0, 'packet_count': 0, 'start_time': time.time()})
+
+        connection_key = f"{src_ip}->{dst_ip}"
+        current_time = time.time()
+
+        # Track outbound data volume
+        self.exfil_tracking[connection_key]['total_bytes'] += packet_size
+        self.exfil_tracking[connection_key]['packet_count'] += 1
+
+        # Check for suspicious patterns
+        entry = self.exfil_tracking[connection_key]
+        duration = current_time - entry['start_time']
+
+        if duration > 60:  # Check after 1 minute
+            # High volume of outbound data
+            if entry['total_bytes'] > 10 * 1024 * 1024:  # 10MB
+                return True
+
+            # Sustained high rate
+            rate = entry['total_bytes'] / duration
+            if rate > 1024 * 1024:  # 1MB/s sustained
+                return True
+
+        return False
+
 
 class PacketSniffer:
     """
@@ -507,6 +589,39 @@ class PacketSniffer:
             }
             anomalies.append(anomaly)
 
+        # DNS tunneling detection
+        if capture_info.payload_info and capture_info.payload_info.get('type') == 'dns_query':
+            query_name = capture_info.payload_info.get('query_name', '')
+            query_type = capture_info.payload_info.get('query_type', '')
+            if self.anomaly_detector.detect_dns_tunneling(query_name, query_type):
+                anomaly = {
+                    'type': 'dns_tunneling',
+                    'src_ip': capture_info.src_ip,
+                    'timestamp': capture_info.timestamp,
+                    'description': f'Potential DNS tunneling from {capture_info.src_ip}'
+                }
+                anomalies.append(anomaly)
+
+        # Beaconing detection
+        if self.anomaly_detector.detect_beaconing(capture_info.src_ip, capture_info.dst_ip, capture_info.packet_size):
+            anomaly = {
+                'type': 'beaconing',
+                'src_ip': capture_info.src_ip,
+                'timestamp': capture_info.timestamp,
+                'description': f'Potential beaconing behavior from {capture_info.src_ip} to {capture_info.dst_ip}'
+            }
+            anomalies.append(anomaly)
+
+        # Data exfiltration detection
+        if self.anomaly_detector.detect_data_exfiltration(capture_info.src_ip, capture_info.dst_ip, capture_info.packet_size, capture_info.protocol):
+            anomaly = {
+                'type': 'data_exfiltration',
+                'src_ip': capture_info.src_ip,
+                'timestamp': capture_info.timestamp,
+                'description': f'Potential data exfiltration from {capture_info.src_ip} to {capture_info.dst_ip}'
+            }
+            anomalies.append(anomaly)
+
         # Store anomalies
         self.statistics['anomalies'].extend(anomalies)
 
@@ -650,6 +765,37 @@ class PacketSniffer:
 
         with open(output_path, 'w') as f:
             json.dump(export_data, f, indent=2, default=str)
+
+    def export_to_csv(self, output_path: str):
+        """Export capture data to CSV file."""
+        import csv
+
+        with open(output_path, 'w', newline='') as csvfile:
+            fieldnames = [
+                'timestamp', 'src_ip', 'dst_ip', 'src_port', 'dst_port',
+                'protocol', 'packet_size', 'flags', 'service', 'info'
+            ]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            # Export packet data
+            packets = self.get_packets()
+            for packet_data in packets:
+                if isinstance(packet_data, dict):
+                    # Ensure all required fields are present
+                    row = {
+                        'timestamp': packet_data.get('timestamp', ''),
+                        'src_ip': packet_data.get('src_ip', ''),
+                        'dst_ip': packet_data.get('dst_ip', ''),
+                        'src_port': packet_data.get('src_port', ''),
+                        'dst_port': packet_data.get('dst_port', ''),
+                        'protocol': packet_data.get('protocol', ''),
+                        'packet_size': packet_data.get('packet_size', ''),
+                        'flags': packet_data.get('flags', ''),
+                        'service': packet_data.get('service', ''),
+                        'info': packet_data.get('info', '')
+                    }
+                    writer.writerow(row)
 
     def generate_report(self, output_path: str):
         """Generate markdown report from capture data."""

@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
     QTextEdit, QFrame, QScrollArea, QCheckBox,
     QTabWidget, QTreeWidget, QTreeWidgetItem,
     QComboBox, QLineEdit, QSpinBox, QSplitter,
-    QToolBar, QMenuBar, QMenu, QApplication
+    QToolBar, QMenuBar, QMenu, QApplication,
+    QDialog, QDialogButtonBox, QPlainTextEdit
 )
 from PySide6.QtCore import Qt, QTimer, Signal, QThread
 from PySide6.QtGui import QFont, QPainter, QPen, QTextCursor, QIcon, QPalette, QAction
@@ -311,6 +312,91 @@ class TrafficMonitorWorker(QThread):
                 self.packet_sniffer.stop_capture()
             except Exception as e:
                 print(f"Error stopping packet sniffer: {e}")
+
+
+class PacketDetailsDialog(QDialog):
+    """Dialog for displaying detailed packet information with hex/ASCII view."""
+
+    def __init__(self, packet_data, parent=None):
+        super().__init__(parent)
+        self.packet_data = packet_data
+        self.setWindowTitle("Packet Details")
+        self.setModal(True)
+        self.resize(800, 600)
+        self.setup_ui()
+
+    def setup_ui(self):
+        """Setup the packet details UI."""
+        layout = QVBoxLayout(self)
+
+        # Packet summary
+        summary_group = QGroupBox("Packet Summary")
+        summary_layout = QGridLayout(summary_group)
+
+        # Add packet information
+        info_items = [
+            ("Timestamp:", self.packet_data.get('timestamp', 'N/A')),
+            ("Source IP:", self.packet_data.get('src_ip', 'N/A')),
+            ("Destination IP:", self.packet_data.get('dst_ip', 'N/A')),
+            ("Source Port:", str(self.packet_data.get('src_port', 'N/A'))),
+            ("Destination Port:", str(self.packet_data.get('dst_port', 'N/A'))),
+            ("Protocol:", self.packet_data.get('protocol', 'N/A')),
+            ("Packet Size:", f"{self.packet_data.get('packet_size', 'N/A')} bytes"),
+            ("Flags:", self.packet_data.get('flags', 'N/A')),
+        ]
+
+        for i, (label, value) in enumerate(info_items):
+            summary_layout.addWidget(QLabel(label), i // 2, (i % 2) * 2)
+            summary_layout.addWidget(QLabel(str(value)), i // 2, (i % 2) * 2 + 1)
+
+        layout.addWidget(summary_group)
+
+        # Packet data view (hex/ASCII)
+        data_group = QGroupBox("Packet Data (Hex/ASCII)")
+        data_layout = QVBoxLayout(data_group)
+
+        self.data_view = QPlainTextEdit()
+        self.data_view.setFont(QFont("Courier", 10))
+        self.data_view.setReadOnly(True)
+
+        # Generate hex/ASCII view
+        packet_bytes = self.packet_data.get('raw_data', b'')
+        if isinstance(packet_bytes, str):
+            packet_bytes = packet_bytes.encode('utf-8', errors='ignore')
+
+        hex_ascii_text = self.format_hex_ascii(packet_bytes)
+        self.data_view.setPlainText(hex_ascii_text)
+
+        data_layout.addWidget(self.data_view)
+        layout.addWidget(data_group)
+
+        # Buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+
+    def format_hex_ascii(self, data):
+        """Format binary data as hex/ASCII view."""
+        if not data:
+            return "No packet data available"
+
+        lines = []
+        for i in range(0, len(data), 16):
+            chunk = data[i:i+16]
+
+            # Offset
+            offset = f"{i:08x}"
+
+            # Hex representation
+            hex_part = ' '.join(f"{b:02x}" for b in chunk)
+            hex_part = hex_part.ljust(47)  # 16 bytes * 2 chars + 15 spaces
+
+            # ASCII representation
+            ascii_part = ''.join(chr(b) if 32 <= b <= 126 else '.' for b in chunk)
+
+            lines.append(f"{offset}  {hex_part}  |{ascii_part}|")
+
+        return '\n'.join(lines)
 
 
 class ZenmapStyleDashboard(QWidget):
@@ -744,6 +830,7 @@ class ZenmapStyleDashboard(QWidget):
         ])
         self.packet_table.horizontalHeader().setStretchLastSection(True)
         self.packet_table.setAlternatingRowColors(True)
+        self.packet_table.itemDoubleClicked.connect(self.show_packet_details)
         self.packet_table.setStyleSheet("""
             QTableWidget {
                 border: 1px solid #e0e0e0;
@@ -1220,6 +1307,14 @@ Services:
 
         # Auto-scroll to bottom
         self.packet_table.scrollToBottom()
+
+    def show_packet_details(self, item):
+        """Show detailed packet information in a dialog."""
+        row = item.row()
+        if row < len(self.packet_data):
+            packet = self.packet_data[row]
+            dialog = PacketDetailsDialog(packet, self)
+            dialog.exec()
 
     def clear_results(self):
         """Clear all scan results."""
