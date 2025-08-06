@@ -1,0 +1,340 @@
+================================================================================
+                    NETSECUREX v1.4.0 - COMPREHENSIVE USER GUIDE
+================================================================================
+
+NetSecureX is a unified cybersecurity toolkit for network security assessment,
+penetration testing, and threat analysis. This guide covers all commands and
+features available in version 1.4.0.
+
+================================================================================
+                                INSTALLATION
+================================================================================
+
+# Method 1: Direct Executable (Recommended)
+netsecx version
+
+# Method 2: Python Installation
+python3 -m pip install --user .
+netsecurex version
+
+# Method 3: Local Executable
+./netsecx version
+
+================================================================================
+                              GLOBAL OPTIONS
+================================================================================
+
+All commands support these global options:
+
+--log-level [DEBUG|INFO|WARNING|ERROR|CRITICAL]  Set logging level
+--log-file PATH                                   Log file path
+--no-console-log                                  Disable console logging
+--help                                            Show help message
+
+Example:
+netsecx scan 192.168.1.1 --log-level DEBUG --log-file scan.log
+
+================================================================================
+                                 COMMANDS
+================================================================================
+
+1. VERSION INFORMATION
+----------------------
+netsecx version
+    Shows NetSecureX version and build information
+
+2. SETUP AND CONFIGURATION
+---------------------------
+netsecx setup
+    Shows configuration file location
+
+netsecx setup --wizard
+    Run interactive setup wizard for API keys
+
+netsecx setup --status
+    Show current configuration status
+
+API Keys (all have free tiers):
+• AbuseIPDB: https://www.abuseipdb.com/api
+• IPQualityScore: https://www.ipqualityscore.com/create-account
+• VirusTotal: https://www.virustotal.com/gui/join-us
+• Vulners: https://vulners.com/api
+• GreyNoise: https://www.greynoise.io/
+• Shodan: https://www.shodan.io/ (paid)
+
+3. PORT SCANNING
+----------------
+netsecx scan TARGET [OPTIONS]
+
+TARGET formats:
+- Single IP: 192.168.1.1
+- IP range: 192.168.1.0/24
+- IP list: 192.168.1.1,192.168.1.2
+- Hostname: example.com
+
+Options:
+-p, --ports TEXT              Port specification (e.g., "80,443,8000-8010")
+-t, --top-ports INTEGER       Number of top ports to scan (default: 1000)
+--timeout FLOAT               Connection timeout in seconds (default: 3.0)
+-c, --max-concurrent INTEGER  Maximum concurrent connections (default: 100)
+--delay FLOAT                 Delay between connections in seconds (default: 0.01)
+-o, --output PATH             Output file path (JSON format)
+--format [table|json]         Output format (default: table)
+--banner-grab                 Enable banner grabbing (slower but more info)
+--report PATH                 Generate markdown report file
+
+Examples:
+netsecx scan 192.168.1.1
+netsecx scan 192.168.1.0/24 --ports "22,80,443"
+netsecx scan example.com --top-ports 100 --timeout 5 --output results.json
+netsecx scan 192.168.1.1 --banner-grab --report scan_report.md
+
+4. PACKET SNIFFING (NEW IN v1.4.0)
+-----------------------------------
+netsecx sniff [OPTIONS]
+
+Advanced network traffic analysis with anomaly detection.
+
+Options:
+-i, --interface TEXT    Network interface to capture on (e.g., eth0, wlan0)
+-d, --duration INTEGER  Capture duration in seconds
+--filter TEXT           BPF filter string (e.g., "tcp port 80")
+--max-packets INTEGER   Maximum packets to capture (default: 10000)
+--save-pcap PATH        Save captured packets to PCAP file
+-o, --output PATH       Output file path (JSON format)
+--csv-output PATH       Export packet data to CSV file
+--report PATH           Generate markdown report file
+--show-stats            Show real-time statistics during capture
+
+Examples:
+netsecx sniff --duration 60
+netsecx sniff --interface eth0 --filter "tcp port 80" --duration 30
+netsecx sniff --duration 120 --save-pcap capture.pcap --report analysis.md
+netsecx sniff --filter "port 53" --show-stats --duration 60
+netsecx sniff --filter "tcp port 443" --output tls_analysis.json
+netsecx sniff --duration 30 --csv-output packets.csv --report summary.md
+
+5. CVE VULNERABILITY LOOKUP
+----------------------------
+netsecx cve [OPTIONS]
+
+Search multiple vulnerability databases for CVE information.
+
+Options:
+--query TEXT                    Search query (e.g., "nginx 1.18.0", "apache httpd")
+--cve TEXT                      Look up specific CVE ID (e.g., "CVE-2022-12345")
+--latest INTEGER                Number of results to show (default: 10)
+-o, --output PATH               Output file path (JSON or Markdown)
+--format [table|json|markdown]  Output format (default: table)
+--critical-only                 Show only critical and high severity CVEs
+--no-cache                      Disable result caching
+
+Examples:
+netsecx cve --query "nginx 1.18.0"
+netsecx cve --query "apache httpd 2.4.51"
+netsecx cve --cve CVE-2022-12345
+netsecx cve --query "openssh 8.2" --critical-only
+netsecx cve --query "log4j" --format json --output cve_results.json
+netsecx cve --query "nginx" --latest 20 --format markdown --output report.md
+
+6. SSL/TLS CERTIFICATE ANALYSIS
+--------------------------------
+netsecx sslcheck TARGET [OPTIONS]
+
+Analyze SSL/TLS certificates for security assessment.
+
+TARGET formats:
+- Hostname: example.com
+- IP address: 192.168.1.1
+- URL: https://example.com (port extracted automatically)
+
+Options:
+-p, --port INTEGER     Port number (default: 443)
+--timeout FLOAT        Connection timeout in seconds (default: 10.0)
+-o, --output PATH      Output file path (JSON format)
+--format [table|json]  Output format (default: table)
+--no-verify-hostname   Disable hostname verification
+--report PATH          Generate markdown report file
+
+Examples:
+netsecx sslcheck example.com
+netsecx sslcheck mail.example.com --port 993
+netsecx sslcheck example.com --format json --output ssl_results.json
+netsecx sslcheck 192.168.1.1 --no-verify-hostname
+
+7. BANNER GRABBING AND SERVICE DETECTION
+-----------------------------------------
+netsecx banner-scan TARGET [OPTIONS]
+
+Perform banner grabbing and service version detection.
+
+Options:
+-p, --ports TEXT       Port specification (e.g., "22,80,443,3306")
+--timeout FLOAT        Connection timeout in seconds (default: 5.0)
+--safe-mode            Enable safe mode (less aggressive probing)
+--delay FLOAT          Delay between connections in seconds (default: 0.1)
+-o, --output PATH      Output file path (JSON format)
+--format [table|json]  Output format (default: table)
+--pass-to-cve          Automatically lookup CVEs for detected services
+--report PATH          Generate markdown report file
+
+Examples:
+netsecx banner-scan 192.168.1.1
+netsecx banner-scan example.com --ports "22,80,443,3306"
+netsecx banner-scan 192.168.1.1 --safe-mode --pass-to-cve
+netsecx banner-scan example.com --output banner_results.json --report banner_report.md
+
+8. IP REPUTATION ANALYSIS
+--------------------------
+netsecx iprep [OPTIONS]
+
+Assess IP reputation using threat intelligence APIs.
+
+Options:
+--ip TEXT              Single IP address to assess
+--file PATH            File containing IP addresses (one per line)
+--min-score FLOAT      Minimum threat score to display (0-100)
+-o, --output PATH      Output file path (JSON format)
+--format [table|json]  Output format (default: table)
+
+Examples:
+netsecx iprep --ip 8.8.8.8
+netsecx iprep --file bad_ips.txt
+netsecx iprep --file ip_list.txt --min-score 60
+netsecx iprep --ip 1.2.3.4 --format json --output reputation_report.json
+netsecx iprep --file targets.txt --min-score 50 --format table
+
+9. FIREWALL TESTING
+--------------------
+netsecx firewall [OPTIONS]
+
+Test firewall rules and port connectivity.
+
+Options:
+-t, --target TEXT          Target IP address or hostname [required]
+-p, --ports TEXT           Port specification (e.g., "80", "80,443", "80-90")
+--udp                      Test UDP ports instead of TCP
+--traceroute               Perform traceroute to target
+--timeout FLOAT            Connection timeout in seconds (default: 3.0)
+--delay FLOAT              Delay between tests in seconds (default: 0.1)
+--max-concurrent INTEGER   Maximum concurrent connections (default: 50)
+-o, --output PATH          Output file path (JSON or CSV)
+--format [table|json|csv]  Output format (default: table)
+--common-ports             Test common ports
+
+Examples:
+netsecx firewall --target 192.168.1.1 --common-ports
+netsecx firewall --target example.com --ports "22,80,443"
+netsecx firewall --target 192.168.1.1 --ports "80-90"
+netsecx firewall --target 8.8.8.8 --ports "53,123" --udp
+netsecx firewall --target example.com --ports "80,443" --traceroute
+netsecx firewall --target 192.168.1.1 --common-ports --output results.csv
+
+10. GRAPHICAL USER INTERFACE
+-----------------------------
+netsecx gui
+
+Launch the enhanced graphical user interface with:
+- Real-time network monitoring
+- Professional packet analysis with hex/ASCII viewer
+- Interactive scanning dashboard
+- Visual threat detection
+- Export capabilities (CSV, JSON, PCAP, Markdown)
+
+Features in GUI:
+- Double-click packets for detailed hex/ASCII view
+- Real-time anomaly detection
+- Professional network monitoring dashboard
+- Integrated threat hunting tools
+
+================================================================================
+                            ADVANCED FEATURES
+================================================================================
+
+ANOMALY DETECTION (v1.4.0):
+- DNS tunneling pattern recognition
+- C2 beaconing detection
+- Data exfiltration monitoring
+- Statistical behavioral analysis
+
+EXPORT FORMATS:
+- JSON: Structured data for automation
+- CSV: Spreadsheet-compatible packet data
+- PCAP: Standard packet capture format
+- Markdown: Human-readable reports
+
+THREAT INTELLIGENCE:
+- Multiple API integrations
+- Real-time reputation scoring
+- Automated CVE correlation
+- Professional threat hunting
+
+================================================================================
+                              SECURITY NOTES
+================================================================================
+
+⚠️  IMPORTANT SECURITY CONSIDERATIONS:
+
+1. Packet sniffing requires elevated privileges (sudo/admin)
+2. Only analyze networks you own or have explicit permission to monitor
+3. Use responsibly and in accordance with local laws and regulations
+4. This is a professional cybersecurity toolkit for authorized operations
+5. Always obtain proper authorization before conducting security assessments
+
+================================================================================
+                              TROUBLESHOOTING
+================================================================================
+
+Common Issues:
+
+1. Permission Denied (Packet Sniffing):
+   Solution: Run with sudo: sudo netsecx sniff --duration 60
+
+2. API Rate Limits:
+   Solution: Configure API keys via: netsecx setup --wizard
+
+3. Network Interface Not Found:
+   Solution: List interfaces: ip link show (Linux) or ifconfig (macOS)
+
+4. Timeout Errors:
+   Solution: Increase timeout: netsecx scan target --timeout 10
+
+5. Large Network Scans:
+   Solution: Reduce concurrency: netsecx scan target --max-concurrent 50
+
+================================================================================
+                                EXAMPLES
+================================================================================
+
+BASIC SECURITY ASSESSMENT:
+netsecx scan 192.168.1.0/24 --top-ports 1000 --report network_scan.md
+netsecx iprep --file discovered_ips.txt --min-score 50
+netsecx cve --query "apache httpd 2.4" --critical-only
+
+NETWORK TRAFFIC ANALYSIS:
+netsecx sniff --duration 300 --csv-output traffic.csv --report analysis.md
+netsecx sniff --filter "tcp port 443" --save-pcap https_traffic.pcap
+
+COMPREHENSIVE HOST ASSESSMENT:
+netsecx scan target.com --banner-grab --report host_scan.md
+netsecx banner-scan target.com --pass-to-cve --output services.json
+netsecx sslcheck target.com --report ssl_analysis.md
+netsecx firewall --target target.com --common-ports --traceroute
+
+THREAT HUNTING:
+netsecx sniff --filter "port 53" --duration 600 --report dns_analysis.md
+netsecx iprep --file suspicious_ips.txt --format json --output threats.json
+
+================================================================================
+                               SUPPORT
+================================================================================
+
+Documentation: https://github.com/avis-enna/NetSecureX
+Issues: https://github.com/avis-enna/NetSecureX/issues
+Version: NetSecureX v1.4.0
+
+For additional help with any command, use: netsecx COMMAND --help
+
+================================================================================
+                              END OF GUIDE
+================================================================================
