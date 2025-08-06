@@ -177,6 +177,7 @@ setup(
             'templates/*.html',
             'templates/*.md',
         ],
+        '': ['VERSION'],  # Include VERSION file in root
     },
     
     # Data files

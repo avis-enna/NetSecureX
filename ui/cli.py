@@ -3037,7 +3037,7 @@ def version():
         with open(version_file, 'r') as f:
             version_str = f.read().strip()
     else:
-        version_str = "1.2.3"  # fallback
+        version_str = "1.4.0"  # fallback updated to v1.4.0
 
     console.print(f"NetSecureX v{version_str}")
     console.print("Unified Cybersecurity Tool")
